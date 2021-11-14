@@ -3,30 +3,18 @@ Telemetry Listener in Python for Forza Horizon 4 and Forza Horizon 5
 
 ## Requirements
 
-You need an Oracle Autonomous JSON Database to run this and need access to the wallet credentials. You will need to download the database's wallet and replace the contents of [the wallet directory here](./wallet) with your information. I also recommend modifying your own sqlnet.ora to also include the final directory of the wallet. This depends on where you're trying to execute the code. If you're trying to use [this present Dockerfile](./Dockerfile), you can simply edit it to:
+You need an Oracle Autonomous JSON Database as the official supporting database for this project. We'll connect to the database using TLS instead of mutual-TLS which frees us from using a wallet to connect the database.
 
-```
-DIRECTORY="/home/appuser/wallets/Wallet_forza"
-```
-
-but in case you're planning to execute manually in your own computer, you'll need to include your wallet's location in your own computer.
-
-Additionally, to be able to connect to the database securely, you'll ned a username, password and DSN. All this information shall be inside a config.yaml file. You will need this structure:
+To connect to the database securely, you'll need a username, password and DSN. All this information shall be inside a config.yaml file. You will need this structure:
 
 ```yaml
 db:
   username: xxxx
   password: xxxx
   dsn: xxxx
-WALLET_DIR: directory_for_wallet_uncompressed
-```
-where WALLET_DIR parts from your $HOME directory. Works in both Windows and UNIX OS's. For example, if your wallet is located at /home/your_username/wallets/my_wallet, then WALLET_DIR should be:
-
-```yaml
-WALLET_DIR: wallets/my_wallet
 ```
 
-After having the database credentials as well, you're good to go.
+After having this YAML file and the database set up with TLS, we're good to go.
 
 ## I don't have an Autonomous DB, what can I do?
 
@@ -155,8 +143,9 @@ Data is output in the following structure:
 - s8 NormalizedDrivingLine;
 - s8 NormalizedAIBrakeDifference;
 
-## Useful Repositories
+## Useful Repositories and Credits
 
 For visualizing the data present here, you can use [this repo](https://github.com/austinbaccus/forza-map-visualization).
+Inspired by [nettrom's repository](https://github.com/nettrom/forza_motorsport) for initial support of his DataPacket class which I later modified.
 
 # How to Run

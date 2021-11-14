@@ -1,9 +1,9 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM oraclelinux:8
+FROM ghcr.io/oracle/oraclelinux8-instantclient:21
 
-RUN dnf -y install oracle-instantclient-release-el8 && \
-    dnf -y install oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-sqlplus && \
-    rm -rf /var/cache/dnf
+#RUN dnf -y install oracle-instantclient-release-el8 && \
+#    dnf -y install oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-sqlplus && \
+#    rm -rf /var/cache/dnf
 
 RUN yum -y update && yum install -y python3 python3-pip
 
@@ -26,6 +26,9 @@ COPY . /app
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 EXPOSE 65530/udp
+EXPOSE 587
+EXPOSE 465
+ 
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-ENTRYPOINT "python3" "listener.py"
+ENTRYPOINT "python3" "src/oracledb.py"
