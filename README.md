@@ -48,6 +48,12 @@ python listener.py --verbose --mode "always"
 
 ### Using Docker
 
+First, you will need to build the image.
+
+```
+docker build --pull --rm -f Dockerfile -t fh5 .
+```
+
 To only log data in a race, 
 ```
 docker run -p 65530:65530/udp --rm fh5:latest --verbose --mode "race"
