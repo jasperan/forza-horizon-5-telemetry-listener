@@ -19,8 +19,7 @@ RUN python3 -m pip install -r requirements.txt
 
 WORKDIR /app
 COPY . /app
-# Copy wallet to /home/appuser/wallets/Wallet_forza
-COPY wallet /home/appuser/wallets/Wallet_forza
+# Wallet is no longer needed as we're using TLS to connect to ADB. See src/testing_db_tls.py for more info.
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers

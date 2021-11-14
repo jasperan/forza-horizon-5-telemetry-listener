@@ -1,8 +1,6 @@
 import cx_Oracle
-import os
 import yaml
-from pathlib import Path
-home = str(Path.home())
+
 
 def process_yaml():
 	with open("config.yaml") as file:
@@ -11,9 +9,6 @@ def process_yaml():
 
 class OracleJSONDatabaseConnection:
     def __init__(self, data=process_yaml()):
-        # wallet location (default is HOME/wallets/wallet_X)
-        os.environ['TNS_ADMIN'] = '{}/{}'.format(home, process_yaml()['WALLET_DIR'])
-        print(os.environ['TNS_ADMIN'])
         self.pool = cx_Oracle.SessionPool(data['db']['username'], data['db']['password'], data['db']['dsn'],
             min=1, max=4, increment=1, threaded=True,
             getmode=cx_Oracle.SPOOL_ATTRVAL_WAIT
