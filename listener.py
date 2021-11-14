@@ -1,11 +1,9 @@
-import json
-import csv
 import logging
 import socket
 import datetime as dt
-from data_packet import ForzaDataPacket
+from src.data_packet import ForzaDataPacket
 import argparse
-from oracledb import OracleJSONDatabaseConnection
+from src.oracledb import OracleJSONDatabaseConnection
 
 cli_parser = argparse.ArgumentParser(
     description="script that grabs data from a Forza Horizon 5 stream and dumps it to a CSV file"
