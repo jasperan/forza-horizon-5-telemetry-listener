@@ -31,4 +31,4 @@ EXPOSE 65530/udp
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 #ENTRYPOINT "python3" "listener.py"
-ENTRYPOINT "/bin/bash"
+ENTRYPOINT "python3" "listener.py"
