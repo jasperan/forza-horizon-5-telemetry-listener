@@ -131,3 +131,11 @@ dmypy.json
 
 # ignore config.yaml file
 config.yaml
+
+# ignore wallet files
+wallet\cwallet.sso
+wallet\ewallet.p12
+wallet\keystore.jks
+wallet\sqlnet.ora
+wallet\tnsnames.ora
+wallet\truststore.jks
