@@ -139,3 +139,4 @@ wallet\keystore.jks
 wallet\sqlnet.ora
 wallet\tnsnames.ora
 wallet\truststore.jks
+wallet
