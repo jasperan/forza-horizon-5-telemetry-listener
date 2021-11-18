@@ -6,3 +6,5 @@ forza-horizon-5-telemetry-listener\wallet\keystore.jks
 forza-horizon-5-telemetry-listener\wallet\sqlnet.ora
 forza-horizon-5-telemetry-listener\wallet\tnsnames.ora
 forza-horizon-5-telemetry-listener\wallet\truststore.jks
+wallet/cwallet.sso
+wallet/ojdbc.properties
