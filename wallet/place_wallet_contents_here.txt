@@ -1,8 +1,0 @@
-You should have these files:
-
-forza-horizon-5-telemetry-listener\wallet\cwallet.sso
-forza-horizon-5-telemetry-listener\wallet\ewallet.p12
-forza-horizon-5-telemetry-listener\wallet\keystore.jks
-forza-horizon-5-telemetry-listener\wallet\sqlnet.ora
-forza-horizon-5-telemetry-listener\wallet\tnsnames.ora
-forza-horizon-5-telemetry-listener\wallet\truststore.jks
