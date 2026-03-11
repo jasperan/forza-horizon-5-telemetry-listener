@@ -3,6 +3,31 @@ Telemetry Listener in Python for Forza Horizon 4 and Forza Horizon 5
 
 ![telemetry](https://static.gosunoob.com/img/1/2021/11/Telemetry-Forza-Horizon-5-How-to-Turn-on-Telemetry.jpg?raw=true)
 
+## Installation
+
+<!-- one-command-install -->
+> **One-command install** — clone, configure, and run in a single step:
+>
+> ```bash
+> curl -fsSL https://raw.githubusercontent.com/jasperan/forza-horizon-5-telemetry-listener/main/install.sh | bash
+> ```
+>
+> <details><summary>Advanced options</summary>
+>
+> Override install location:
+> ```bash
+> PROJECT_DIR=/opt/myapp curl -fsSL https://raw.githubusercontent.com/jasperan/forza-horizon-5-telemetry-listener/main/install.sh | bash
+> ```
+>
+> Or install manually:
+> ```bash
+> git clone https://github.com/jasperan/forza-horizon-5-telemetry-listener.git
+> cd forza-horizon-5-telemetry-listener
+> # See below for setup instructions
+> ```
+> </details>
+
+
 ## Requirements
 
 You need an Oracle Autonomous JSON Database as the official supporting database for this project. To run this and need access to the wallet credentials. You will need to download the database's wallet and replace the contents of [the wallet directory here](./wallet) with your information. I also recommend modifying your own sqlnet.ora to also include the final directory of the wallet. This depends on where you're trying to execute the code. If you're trying to use [this present Dockerfile](./Dockerfile), you can simply edit it to:
