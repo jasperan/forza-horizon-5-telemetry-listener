@@ -1,13 +1,6 @@
 """Tests for the Car DNA fingerprinting system."""
 
-import sys
-import os
-
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "src")
-)
-
-from analytics.car_dna import CarDNACollector
+from src.analytics.car_dna import CarDNACollector
 
 
 def _make_sample(**overrides) -> dict:

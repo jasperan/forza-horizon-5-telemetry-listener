@@ -1,6 +1,7 @@
 """Tests for the optional Ollama LLM coaching module."""
 
-from unittest.mock import patch, MagicMock
+import pytest
+from unittest.mock import patch, MagicMock, AsyncMock
 
 from src.coach.llm_coach import LLMCoach
 
@@ -21,10 +22,11 @@ SAMPLE_LAP_STATS = {
 # Disabled by default
 # ---------------------------------------------------------------------------
 
-def test_llm_coach_disabled_by_default():
+@pytest.mark.asyncio
+async def test_llm_coach_disabled_by_default():
     coach = LLMCoach()
     assert coach.enabled is False
-    result = coach.generate_tip(SAMPLE_ALERTS, SAMPLE_LAP_STATS)
+    result = await coach.generate_tip(SAMPLE_ALERTS, SAMPLE_LAP_STATS)
     assert result is None
 
 
@@ -52,24 +54,30 @@ def test_llm_coach_formats_prompt():
 # Successful Ollama call
 # ---------------------------------------------------------------------------
 
+@pytest.mark.asyncio
 @patch("src.coach.llm_coach.httpx")
-def test_llm_coach_calls_ollama(mock_httpx):
+async def test_llm_coach_calls_ollama(mock_httpx):
     mock_response = MagicMock()
     mock_response.json.return_value = {
         "response": "Ease off the throttle earlier in Turn 3 to save your front-left tire."
     }
     mock_response.raise_for_status = MagicMock()
-    mock_httpx.post.return_value = mock_response
+
+    mock_client = AsyncMock()
+    mock_client.post.return_value = mock_response
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    mock_httpx.AsyncClient.return_value = mock_client
 
     coach = LLMCoach(enabled=True, model="qwen3.5:35b-a3b", ollama_url="http://localhost:11434")
-    result = coach.generate_tip(SAMPLE_ALERTS, SAMPLE_LAP_STATS)
+    result = await coach.generate_tip(SAMPLE_ALERTS, SAMPLE_LAP_STATS)
 
     assert result is not None
     assert result["type"] == "llm_tip"
     assert "throttle" in result["message"]
 
     # Verify the post was called with the correct URL
-    call_args = mock_httpx.post.call_args
+    call_args = mock_client.post.call_args
     assert "/api/generate" in call_args[0][0]
     assert call_args[1]["json"]["model"] == "qwen3.5:35b-a3b"
     assert call_args[1]["json"]["stream"] is False
@@ -79,11 +87,16 @@ def test_llm_coach_calls_ollama(mock_httpx):
 # Graceful degradation on failure
 # ---------------------------------------------------------------------------
 
+@pytest.mark.asyncio
 @patch("src.coach.llm_coach.httpx")
-def test_llm_coach_handles_ollama_failure(mock_httpx):
-    mock_httpx.post.side_effect = Exception("Connection refused")
+async def test_llm_coach_handles_ollama_failure(mock_httpx):
+    mock_client = AsyncMock()
+    mock_client.post.side_effect = Exception("Connection refused")
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+    mock_httpx.AsyncClient.return_value = mock_client
 
     coach = LLMCoach(enabled=True)
-    result = coach.generate_tip(SAMPLE_ALERTS, SAMPLE_LAP_STATS)
+    result = await coach.generate_tip(SAMPLE_ALERTS, SAMPLE_LAP_STATS)
 
     assert result is None

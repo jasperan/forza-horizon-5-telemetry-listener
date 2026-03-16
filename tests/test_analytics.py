@@ -1,17 +1,9 @@
 """Tests for the analytics module: lap_analyzer and track_mapper."""
 
 import math
-import sys
-import os
 
-# Ensure src is importable
-sys.path.insert(
-    0,
-    os.path.join(os.path.dirname(__file__), os.pardir, "src"),
-)
-
-from analytics.lap_analyzer import compute_sector_times, compute_performance_vector
-from analytics.track_mapper import downsample_positions, compute_track_hash
+from src.analytics.lap_analyzer import compute_sector_times, compute_performance_vector
+from src.analytics.track_mapper import downsample_positions, compute_track_hash
 
 
 class TestSectorTimes:

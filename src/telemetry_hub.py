@@ -79,6 +79,7 @@ class TelemetryHub:
         return {
             target_key: packet[src_key]
             for src_key, target_key in _SESSION_FIELD_MAP.items()
+            if src_key in packet
         }
 
     # -- main async pipeline --------------------------------------------------

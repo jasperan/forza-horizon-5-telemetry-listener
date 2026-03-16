@@ -56,7 +56,7 @@ def main():
 
     @app.on_event("startup")
     async def startup():
-        await hub.start_udp()
+        hub._udp_transport = await hub.start_udp()
         logger.info("Forza Telemetry Platform running")
         logger.info("  UDP listener: port %d", args.port)
         logger.info("  Dashboard:    http://localhost:%d", args.web_port)

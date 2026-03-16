@@ -10,23 +10,23 @@ def _base_packet(**overrides) -> dict:
     pkt = {
         "is_race_on": 1,
         "timestamp_ms": 1000,
-        "tire_temp_fl": 180.0,
-        "tire_temp_fr": 180.0,
-        "tire_temp_rl": 180.0,
-        "tire_temp_rr": 180.0,
-        "tire_combined_slip_fl": 0.3,
-        "tire_combined_slip_fr": 0.3,
-        "tire_combined_slip_rl": 0.3,
-        "tire_combined_slip_rr": 0.3,
+        "tire_temp_FL": 180.0,
+        "tire_temp_FR": 180.0,
+        "tire_temp_RL": 180.0,
+        "tire_temp_RR": 180.0,
+        "tire_combined_slip_FL": 0.3,
+        "tire_combined_slip_FR": 0.3,
+        "tire_combined_slip_RL": 0.3,
+        "tire_combined_slip_RR": 0.3,
         "current_engine_rpm": 6000.0,
         "engine_max_rpm": 8000.0,
         "speed": 45.0,
         "accel": 200,
         "brake": 0,
-        "normalized_suspension_travel_fl": 0.5,
-        "normalized_suspension_travel_fr": 0.5,
-        "normalized_suspension_travel_rl": 0.5,
-        "normalized_suspension_travel_rr": 0.5,
+        "norm_suspension_travel_FL": 0.5,
+        "norm_suspension_travel_FR": 0.5,
+        "norm_suspension_travel_RL": 0.5,
+        "norm_suspension_travel_RR": 0.5,
     }
     pkt.update(overrides)
     return pkt
@@ -63,10 +63,10 @@ def test_tire_overheat_alert():
     for i in range(5):
         pkt = _base_packet(
             timestamp_ms=1000 + i * 16,
-            tire_temp_fl=180.0,
-            tire_temp_fr=180.0,
-            tire_temp_rl=180.0,
-            tire_temp_rr=180.0,
+            tire_temp_FL=180.0,
+            tire_temp_FR=180.0,
+            tire_temp_RL=180.0,
+            tire_temp_RR=180.0,
         )
         alerts = engine.evaluate(pkt, mgr)
         all_alerts.extend(alerts)
@@ -75,10 +75,10 @@ def test_tire_overheat_alert():
     for i in range(10):
         pkt = _base_packet(
             timestamp_ms=1080 + i * 16,
-            tire_temp_fl=250.0,  # significantly hotter than running avg
-            tire_temp_fr=180.0,
-            tire_temp_rl=180.0,
-            tire_temp_rr=180.0,
+            tire_temp_FL=250.0,  # significantly hotter than running avg
+            tire_temp_FR=180.0,
+            tire_temp_RL=180.0,
+            tire_temp_RR=180.0,
         )
         alerts = engine.evaluate(pkt, mgr)
         all_alerts.extend(alerts)
@@ -101,8 +101,8 @@ def test_traction_loss_alert():
     for i in range(5):
         pkt = _base_packet(
             timestamp_ms=1000 + i * 16,
-            tire_combined_slip_rl=1.5,
-            tire_combined_slip_rr=1.5,
+            tire_combined_slip_RL=1.5,
+            tire_combined_slip_RR=1.5,
         )
         alerts = engine.evaluate(pkt, mgr)
         all_alerts.extend(alerts)
@@ -125,8 +125,8 @@ def test_cooldown_prevents_spam():
     for i in range(20):
         pkt = _base_packet(
             timestamp_ms=1000 + i * 16,
-            tire_combined_slip_rl=1.5,
-            tire_combined_slip_rr=1.5,
+            tire_combined_slip_RL=1.5,
+            tire_combined_slip_RR=1.5,
         )
         alerts = engine.evaluate(pkt, mgr)
         all_alerts.extend(alerts)
@@ -143,6 +143,6 @@ def test_no_alerts_without_session():
     mgr = SessionManager()
     engine = CoachEngine()
 
-    pkt = _base_packet(tire_combined_slip_rl=1.5)
+    pkt = _base_packet(tire_combined_slip_RL=1.5)
     alerts = engine.evaluate(pkt, mgr)
     assert alerts == []
