@@ -59,7 +59,9 @@ class TelemetryHub:
 
         self.coach_engine = None  # set externally (CoachEngine instance)
         self.car_dna = None       # set externally (CarDNA instance)
+        self.llm_coach = None     # set externally (LLMCoach instance)
         self.packet_count: int = 0
+        self._recent_alerts: list = []
 
     # -- packet parsing -------------------------------------------------------
 
@@ -114,6 +116,7 @@ class TelemetryHub:
         if self.coach_engine is not None:
             alerts = self.coach_engine.evaluate(packet, self.session_mgr)
             if alerts:
+                self._recent_alerts.extend(alerts)
                 await self.ws_mgr.broadcast("coach", {"type": "alerts", "alerts": alerts})
 
         # Buffer for DB
@@ -131,6 +134,16 @@ class TelemetryHub:
                 "coach",
                 {"type": "lap_complete", "lap": last_lap},
             )
+
+            # LLM coaching tip on lap completion
+            if hasattr(self, 'llm_coach') and self.llm_coach and self.llm_coach.enabled:
+                tip = await self.llm_coach.generate_tip(
+                    alerts=self._recent_alerts,
+                    lap_stats={"lap_no": last_lap["lap_no"], "lap_time": last_lap.get("lap_time", last_lap.get("lap_time_ms", 0))},
+                )
+                if tip:
+                    await self.ws_mgr.broadcast("coach", tip)
+            self._recent_alerts = []
 
     # -- UDP server -----------------------------------------------------------
 

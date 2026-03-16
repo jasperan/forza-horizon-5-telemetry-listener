@@ -459,10 +459,10 @@
 
     function updateTires() {
         if (!latestData) return;
-        updateTireTemp(dom.tireFL, latestData.tire_temp_fl || 0);
-        updateTireTemp(dom.tireFR, latestData.tire_temp_fr || 0);
-        updateTireTemp(dom.tireRL, latestData.tire_temp_rl || 0);
-        updateTireTemp(dom.tireRR, latestData.tire_temp_rr || 0);
+        updateTireTemp(dom.tireFL, latestData.tire_temp_FL || 0);
+        updateTireTemp(dom.tireFR, latestData.tire_temp_FR || 0);
+        updateTireTemp(dom.tireRL, latestData.tire_temp_RL || 0);
+        updateTireTemp(dom.tireRR, latestData.tire_temp_RR || 0);
     }
 
     // ── Lap Delta (DOM) ──────────────────────────────────────────────────

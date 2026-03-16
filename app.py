@@ -65,6 +65,13 @@ def main():
         logger.info("  DB:           %s", "connected" if db_pool else "disabled")
         logger.info("  LLM Coach:    %s", "enabled" if args.enable_llm else "disabled")
 
+    @app.on_event("shutdown")
+    async def shutdown():
+        if hub._udp_transport:
+            hub._udp_transport.close()
+        if db_pool:
+            db_pool.close()
+
     uvicorn.run(app, host="0.0.0.0", port=args.web_port, log_level="info")
 
 
