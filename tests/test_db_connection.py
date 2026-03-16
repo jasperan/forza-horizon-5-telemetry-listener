@@ -1,5 +1,7 @@
 """Tests for db_writer module - pool creation and config loading."""
+import importlib
 import os
+import sys
 import tempfile
 from unittest.mock import patch, MagicMock
 
@@ -23,13 +25,19 @@ def test_db_connection_loads_config():
 
     try:
         mock_pool = MagicMock()
-        with patch("oracledb.create_pool", return_value=mock_pool) as mock_create:
+        mock_oracledb = MagicMock()
+        mock_oracledb.create_pool.return_value = mock_pool
+        with patch.dict("sys.modules", {"oracledb": mock_oracledb}):
+            # Re-import to pick up the mock
+            import importlib
+            import src.db_writer
+            importlib.reload(src.db_writer)
             from src.db_writer import create_pool
 
             pool = create_pool(tmp_path)
 
-            mock_create.assert_called_once()
-            call_kwargs = mock_create.call_args
+            mock_oracledb.create_pool.assert_called_once()
+            call_kwargs = mock_oracledb.create_pool.call_args
             assert call_kwargs.kwargs["user"] == "testuser"
             assert call_kwargs.kwargs["password"] == "testpass"
             assert call_kwargs.kwargs["dsn"] == "testdsn_high"
