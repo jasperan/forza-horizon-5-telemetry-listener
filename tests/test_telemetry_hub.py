@@ -116,9 +116,9 @@ class TestHubCreation:
         assert hub.packet_count == 0
 
     def test_custom_params(self):
-        hub = TelemetryHub(udp_port=12345, db_pool=None, batch_size=10, mode="free")
+        hub = TelemetryHub(udp_port=12345, db_pool=None, batch_size=10, mode="always")
         assert hub.udp_port == 12345
-        assert hub.mode == "free"
+        assert hub.mode == "always"
         assert hub.db_writer.batch_size == 10
 
 
@@ -238,9 +238,9 @@ class TestOnPacket:
         assert "session_id" in buffered[0]
 
     @pytest.mark.asyncio
-    async def test_free_mode_processes_all_packets(self):
-        """In 'free' mode, packets with is_race_on=0 still go through the pipeline."""
-        hub = TelemetryHub(udp_port=65530, db_pool=None, mode="free")
+    async def test_always_mode_processes_all_packets(self):
+        """In 'always' mode, packets with is_race_on=0 still go through the pipeline."""
+        hub = TelemetryHub(udp_port=65530, db_pool=None, mode="always")
         data = _make_packet(is_race_on=0, timestamp_ms=100)
         await hub.on_packet(data)
         assert hub.packet_count == 1
