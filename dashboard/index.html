@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forza Telemetry</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+    <script src="/dashboard/app.js" defer></script>
+</head>
+<body data-mode="full">
+
+    <!-- Connection Status -->
+    <div id="connection-status" class="disconnected">
+        <span class="status-dot"></span>
+        <span class="status-text">Disconnected</span>
+    </div>
+
+    <!-- Mode Toggle -->
+    <button id="mode-toggle" title="Toggle compact/full mode">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="1" y="1" width="14" height="4" rx="1" opacity="0.6"/>
+            <rect x="1" y="7" width="14" height="8" rx="1"/>
+        </svg>
+    </button>
+
+    <!-- ========== FULL MODE DASHBOARD ========== -->
+    <div id="dashboard-full">
+        <div class="grid-container">
+
+            <!-- RPM Panel -->
+            <div id="rpm-panel" class="panel">
+                <div class="panel-header">RPM</div>
+                <div class="panel-body gauge-body">
+                    <canvas id="rpm-gauge" width="300" height="300"></canvas>
+                    <div class="gauge-overlay">
+                        <span id="gear-display" class="gear-number">N</span>
+                        <span class="gauge-label">GEAR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speed Panel -->
+            <div id="speed-panel" class="panel">
+                <div class="panel-header">SPEED</div>
+                <div class="panel-body gauge-body">
+                    <canvas id="speed-gauge" width="300" height="300"></canvas>
+                    <div class="gauge-overlay">
+                        <span id="speed-display" class="speed-number">0</span>
+                        <span class="gauge-label">KM/H</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Track Map Panel -->
+            <div id="track-panel" class="panel">
+                <div class="panel-header">TRACK MAP</div>
+                <div class="panel-body">
+                    <canvas id="track-map" width="400" height="400"></canvas>
+                </div>
+            </div>
+
+            <!-- G-Force Panel -->
+            <div id="gforce-panel" class="panel">
+                <div class="panel-header">G-FORCE</div>
+                <div class="panel-body gauge-body">
+                    <canvas id="gforce-circle" width="250" height="250"></canvas>
+                </div>
+            </div>
+
+            <!-- Tires Panel -->
+            <div id="tires-panel" class="panel">
+                <div class="panel-header">TIRE TEMPS</div>
+                <div class="panel-body">
+                    <div class="tires-grid">
+                        <div id="tire-fl" class="tire-cell">
+                            <span class="tire-label">FL</span>
+                            <span class="tire-temp">--&deg;C</span>
+                        </div>
+                        <div id="tire-fr" class="tire-cell">
+                            <span class="tire-label">FR</span>
+                            <span class="tire-temp">--&deg;C</span>
+                        </div>
+                        <div id="tire-rl" class="tire-cell">
+                            <span class="tire-label">RL</span>
+                            <span class="tire-temp">--&deg;C</span>
+                        </div>
+                        <div id="tire-rr" class="tire-cell">
+                            <span class="tire-label">RR</span>
+                            <span class="tire-temp">--&deg;C</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delta Panel -->
+            <div id="delta-panel" class="panel">
+                <div class="panel-header">LAP DELTA</div>
+                <div class="panel-body">
+                    <div class="delta-display">
+                        <span id="delta-value" class="delta-time neutral">+0.000</span>
+                    </div>
+                    <div class="delta-info">
+                        <div class="delta-row">
+                            <span class="delta-label">BEST</span>
+                            <span id="best-lap" class="delta-val">--:--.---</span>
+                        </div>
+                        <div class="delta-row">
+                            <span class="delta-label">CURRENT</span>
+                            <span id="current-lap" class="delta-val">--:--.---</span>
+                        </div>
+                        <div class="delta-row">
+                            <span class="delta-label">LAP</span>
+                            <span id="lap-count" class="delta-val">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coach Panel -->
+            <div id="coach-panel" class="panel">
+                <div class="panel-header">
+                    COACH
+                    <span class="coach-badge">LIVE</span>
+                </div>
+                <div class="panel-body">
+                    <ul id="coach-feed"></ul>
+                </div>
+            </div>
+
+            <!-- Inputs Panel -->
+            <div id="inputs-panel" class="panel">
+                <div class="panel-header">INPUTS</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-label">THR</span>
+                        <div class="input-bar-track">
+                            <div id="throttle-bar" class="input-bar throttle" style="width: 0%"></div>
+                        </div>
+                        <span id="throttle-val" class="input-val">0%</span>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-label">BRK</span>
+                        <div class="input-bar-track">
+                            <div id="brake-bar" class="input-bar brake" style="width: 0%"></div>
+                        </div>
+                        <span id="brake-val" class="input-val">0%</span>
+                    </div>
+                    <div class="input-group steer-group">
+                        <span class="input-label">STR</span>
+                        <div class="steer-track">
+                            <div class="steer-center"></div>
+                            <div id="steer-indicator" class="steer-indicator" style="left: 50%"></div>
+                        </div>
+                        <span id="steer-val" class="input-val">0&deg;</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========== COMPACT MODE DASHBOARD ========== -->
+    <div id="dashboard-compact">
+        <div class="compact-strip">
+            <div class="compact-cell compact-gear">
+                <span id="compact-gear" class="compact-gear-num">N</span>
+                <span id="compact-speed" class="compact-speed-num">0</span>
+                <span class="compact-unit">KM/H</span>
+            </div>
+            <div class="compact-cell compact-inputs">
+                <div class="compact-bar-group">
+                    <span class="compact-bar-label">T</span>
+                    <div class="compact-bar-track">
+                        <div id="compact-throttle" class="compact-bar throttle" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="compact-bar-group">
+                    <span class="compact-bar-label">B</span>
+                    <div class="compact-bar-track">
+                        <div id="compact-brake" class="compact-bar brake" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="compact-cell compact-delta">
+                <span class="compact-delta-label">DELTA</span>
+                <span id="compact-delta" class="compact-delta-val neutral">+0.000</span>
+            </div>
+            <div class="compact-cell compact-coach">
+                <span class="compact-coach-label">COACH</span>
+                <span id="compact-coach-msg" class="compact-coach-text">Waiting for data...</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
