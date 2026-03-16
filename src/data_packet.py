@@ -85,3 +85,14 @@ class ForzaDataPacket:
 
         return([getattr(self, prop_name) for prop_name in \
                 self.sled_props + self.dash_props])
+
+    def to_dict(self) -> dict:
+        """Convert all parsed properties to a dictionary."""
+        result = {}
+        for prop in self.get_props():
+            if hasattr(self, prop):
+                result[prop] = getattr(self, prop)
+        return result
+
+    def __repr__(self) -> str:
+        return f"ForzaDataPacket(race={self.is_race_on}, rpm={getattr(self, 'current_engine_rpm', 0):.0f}, ts={self.timestamp_ms})"
