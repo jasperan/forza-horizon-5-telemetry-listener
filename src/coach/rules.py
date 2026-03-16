@@ -4,8 +4,7 @@ Each rule function takes (packet: dict, state: dict) and returns an alert dict o
 The state dict is shared across calls so rules can track running averages, streaks, etc.
 """
 
-CORNERS = ["fl", "fr", "rl", "rr"]
-CORNER_LABELS = {"fl": "FL", "fr": "FR", "rl": "RL", "rr": "RR"}
+CORNERS = ["FL", "FR", "RL", "RR"]
 
 # ---------------------------------------------------------------------------
 # Tire overheat: alert when any tire temp exceeds 105% of its running average
@@ -34,7 +33,7 @@ def check_tire_overheat(packet: dict, state: dict) -> dict | None:
             state["tire_hot_streak"][corner] = 0
 
         if state["tire_hot_streak"][corner] >= 5:
-            label = CORNER_LABELS[corner]
+            label = corner
             return {
                 "type": "alert",
                 "rule": "tire_overheat",
@@ -64,7 +63,7 @@ def check_traction_loss(packet: dict, state: dict) -> dict | None:
             state["slip_streak"][corner] = 0
 
         if state["slip_streak"][corner] >= 3:
-            label = CORNER_LABELS[corner]
+            label = corner
             return {
                 "type": "alert",
                 "rule": "traction_loss",
@@ -113,11 +112,11 @@ def check_gear_selection(packet: dict, state: dict) -> dict | None:
 def check_suspension_bottoming(packet: dict, state: dict) -> dict | None:
     """Alert when any corner's normalized suspension travel exceeds 0.95."""
     for corner in CORNERS:
-        key = f"normalized_suspension_travel_{corner}"
+        key = f"norm_suspension_travel_{corner}"
         travel = packet.get(key, 0.0)
 
         if travel > 0.95:
-            label = CORNER_LABELS[corner]
+            label = corner
             return {
                 "type": "alert",
                 "rule": "suspension_bottoming",

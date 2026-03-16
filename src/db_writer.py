@@ -70,8 +70,8 @@ class BatchedDBWriter:
         if self.pool is None:
             self._buffer.clear()
             return
+        conn = self.pool.acquire()
         try:
-            conn = self.pool.acquire()
             soda = conn.getSodaDatabase()
             coll = soda.createCollection(self.collection_name)
             for doc in self._buffer:
@@ -82,16 +82,19 @@ class BatchedDBWriter:
         except Exception as e:
             logger.error("DB flush failed: %s", e)
         finally:
+            self.pool.release(conn)
             self._buffer.clear()
 
     def save_document(self, collection_name: str, document: dict):
         if self.pool is None:
             return
+        conn = self.pool.acquire()
         try:
-            conn = self.pool.acquire()
             soda = conn.getSodaDatabase()
             coll = soda.createCollection(collection_name)
             coll.insertOne(document)
             conn.commit()
         except Exception as e:
             logger.error("DB save failed for %s: %s", collection_name, e)
+        finally:
+            self.pool.release(conn)

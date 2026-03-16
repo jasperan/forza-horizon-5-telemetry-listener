@@ -41,7 +41,7 @@ class WSManager:
     async def broadcast(self, channel: str, data: dict) -> None:
         """Send data to every connection on a channel, pruning dead ones."""
         dead: list = []
-        for ws in self.connections[channel]:
+        for ws in list(self.connections[channel]):
             try:
                 await ws.send_json(data)
             except Exception:

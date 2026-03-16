@@ -37,7 +37,7 @@ class LLMCoach:
 
         return "\n".join(lines)
 
-    def generate_tip(self, alerts: list[dict], lap_stats: dict) -> dict | None:
+    async def generate_tip(self, alerts: list[dict], lap_stats: dict) -> dict | None:
         """Generate a coaching tip from alerts and lap data via Ollama.
 
         Returns None when disabled, when there are no alerts, when httpx is
@@ -52,21 +52,22 @@ class LLMCoach:
         prompt = self._build_prompt(alerts, lap_stats)
 
         try:
-            response = httpx.post(
-                f"{self.ollama_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "system": SYSTEM_PROMPT,
-                    "stream": False,
-                },
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-            message = data.get("response", "").strip()
-            if not message:
-                return None
-            return {"type": "llm_tip", "message": message}
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.ollama_url}/api/generate",
+                    json={
+                        "model": self.model,
+                        "prompt": prompt,
+                        "system": SYSTEM_PROMPT,
+                        "stream": False,
+                    },
+                    timeout=30.0,
+                )
+                response.raise_for_status()
+                data = response.json()
+                message = data.get("response", "").strip()
+                if not message:
+                    return None
+                return {"type": "llm_tip", "message": message}
         except Exception:
             return None
