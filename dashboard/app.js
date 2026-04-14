@@ -133,36 +133,36 @@
     }
 
     function rpmColor(ratio) {
-        // green -> yellow -> red
+        // green -> amber -> red (desaturated palette)
         if (ratio < 0.5) {
-            var c = lerpColor([46, 204, 113], [241, 196, 15], ratio * 2);
+            var c = lerpColor([76, 175, 130], [212, 168, 68], ratio * 2);
             return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
         }
-        var c = lerpColor([241, 196, 15], [231, 76, 60], (ratio - 0.5) * 2);
+        var c = lerpColor([212, 168, 68], [212, 84, 84], (ratio - 0.5) * 2);
         return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
     }
 
     function speedColor(ratio) {
-        // blue -> cyan -> white
+        // blue -> teal -> light (desaturated palette)
         if (ratio < 0.5) {
-            var c = lerpColor([52, 152, 219], [26, 188, 220], ratio * 2);
+            var c = lerpColor([84, 136, 180], [76, 175, 160], ratio * 2);
             return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
         }
-        var c = lerpColor([26, 188, 220], [236, 240, 241], (ratio - 0.5) * 2);
+        var c = lerpColor([76, 175, 160], [210, 220, 228], (ratio - 0.5) * 2);
         return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
     }
 
     function trackSpeedColor(ratio) {
-        // blue (slow) -> green -> yellow -> red (fast)
+        // blue (slow) -> green -> amber -> red (fast), desaturated
         if (ratio < 0.33) {
-            var c = lerpColor([52, 152, 219], [46, 204, 113], ratio / 0.33);
+            var c = lerpColor([84, 136, 180], [76, 175, 130], ratio / 0.33);
             return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
         }
         if (ratio < 0.66) {
-            var c = lerpColor([46, 204, 113], [241, 196, 15], (ratio - 0.33) / 0.33);
+            var c = lerpColor([76, 175, 130], [212, 168, 68], (ratio - 0.33) / 0.33);
             return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
         }
-        var c = lerpColor([241, 196, 15], [231, 76, 60], (ratio - 0.66) / 0.34);
+        var c = lerpColor([212, 168, 68], [212, 84, 84], (ratio - 0.66) / 0.34);
         return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
     }
 
@@ -188,7 +188,7 @@
         // Background arc
         ctx.beginPath();
         ctx.arc(cx, cy, radius, startAngle, endAngle);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
         ctx.lineWidth = lineWidth;
         ctx.lineCap = 'round';
         ctx.stroke();
@@ -215,7 +215,7 @@
             var redlineStart = startAngle + sweepAngle * 0.9;
             ctx.beginPath();
             ctx.arc(cx, cy, radius + lineWidth * 0.7, redlineStart, endAngle);
-            ctx.strokeStyle = 'rgba(231, 76, 60, 0.3)';
+            ctx.strokeStyle = 'rgba(212, 84, 84, 0.25)';
             ctx.lineWidth = 2;
             ctx.stroke();
         }
@@ -236,7 +236,7 @@
 
         // Numeric value below center
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.font = '600 12px system-ui, sans-serif';
+        ctx.font = "500 11px 'Geist', system-ui, sans-serif";
         ctx.textAlign = 'center';
         ctx.fillText(label, cx, cy + radius * 0.6);
     }
@@ -293,8 +293,8 @@
         gforceCtx.stroke();
 
         // Labels
-        gforceCtx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-        gforceCtx.font = '9px system-ui, sans-serif';
+        gforceCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        gforceCtx.font = "500 9px 'Geist', system-ui, sans-serif";
         gforceCtx.textAlign = 'center';
         gforceCtx.fillText('BRAKE', cx, cy - radius + 12);
         gforceCtx.fillText('ACCEL', cx, cy + radius - 6);
@@ -321,7 +321,7 @@
 
             gforceCtx.beginPath();
             gforceCtx.arc(dotX, dotY, 2, 0, Math.PI * 2);
-            gforceCtx.fillStyle = 'rgba(52, 152, 219, ' + alpha + ')';
+            gforceCtx.fillStyle = 'rgba(84, 136, 180, ' + alpha + ')';
             gforceCtx.fill();
         }
 
@@ -345,15 +345,15 @@
             gforceCtx.beginPath();
             gforceCtx.arc(curX, curY, 6, 0, Math.PI * 2);
             var glow = gforceCtx.createRadialGradient(curX, curY, 0, curX, curY, 6);
-            glow.addColorStop(0, 'rgba(231, 76, 60, 0.8)');
-            glow.addColorStop(1, 'rgba(231, 76, 60, 0)');
+            glow.addColorStop(0, 'rgba(224, 144, 64, 0.8)');
+            glow.addColorStop(1, 'rgba(224, 144, 64, 0)');
             gforceCtx.fillStyle = glow;
             gforceCtx.fill();
 
             // Dot
             gforceCtx.beginPath();
             gforceCtx.arc(curX, curY, 3, 0, Math.PI * 2);
-            gforceCtx.fillStyle = '#e74c3c';
+            gforceCtx.fillStyle = '#e09040';
             gforceCtx.fill();
         }
     }
@@ -368,8 +368,8 @@
         trackCtx.clearRect(0, 0, w, h);
 
         if (trackPoints.length < 2) {
-            trackCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-            trackCtx.font = '12px system-ui, sans-serif';
+            trackCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+            trackCtx.font = "400 12px 'Geist', system-ui, sans-serif";
             trackCtx.textAlign = 'center';
             trackCtx.fillText('Waiting for position data...', w / 2, h / 2);
             return;
@@ -546,6 +546,10 @@
 
     // ── Coach Feed (DOM) ─────────────────────────────────────────────────
     function addCoachAlert(alert) {
+        // Remove empty-state placeholder on first real alert
+        var emptyItem = dom.coachFeed.querySelector('.coach-empty');
+        if (emptyItem) emptyItem.remove();
+
         var li = document.createElement('li');
 
         // Severity class
