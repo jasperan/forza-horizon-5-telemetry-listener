@@ -3,150 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time telemetry dashboard for Forza Horizon 4/5 with live driving stats, AI coach, and track mapping.">
+    <meta name="theme-color" content="#0c0c14">
     <title>Forza Telemetry</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/dashboard/style.css">
     <script src="/dashboard/app.js" defer></script>
 </head>
 <body data-mode="full">
 
-    <!-- Connection Status -->
-    <div id="connection-status" class="disconnected">
-        <span class="status-dot"></span>
-        <span class="status-text">Disconnected</span>
-    </div>
+    <!-- Grain overlay for texture -->
+    <div class="grain-overlay" aria-hidden="true"></div>
 
-    <!-- Mode Toggle -->
-    <button id="mode-toggle" title="Toggle compact/full mode">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <rect x="1" y="1" width="14" height="4" rx="1" opacity="0.6"/>
-            <rect x="1" y="7" width="14" height="8" rx="1"/>
-        </svg>
-    </button>
+    <!-- Connection status -->
+    <nav id="top-bar" aria-label="Dashboard controls">
+        <div id="connection-status" class="disconnected">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="status-text">Disconnected</span>
+        </div>
+        <button id="mode-toggle" title="Toggle compact/full mode (M)" aria-label="Toggle dashboard mode">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <rect x="1" y="1" width="14" height="4" rx="1" opacity="0.6"/>
+                <rect x="1" y="7" width="14" height="8" rx="1"/>
+            </svg>
+        </button>
+    </nav>
 
     <!-- ========== FULL MODE DASHBOARD ========== -->
-    <div id="dashboard-full">
+    <main id="dashboard-full">
         <div class="grid-container">
 
             <!-- RPM Panel -->
-            <div id="rpm-panel" class="panel">
-                <div class="panel-header">RPM</div>
+            <section id="rpm-panel" class="panel" aria-label="RPM gauge">
+                <header class="panel-header">RPM</header>
                 <div class="panel-body gauge-body">
                     <canvas id="rpm-gauge" width="300" height="300"></canvas>
                     <div class="gauge-overlay">
                         <span id="gear-display" class="gear-number">N</span>
-                        <span class="gauge-label">GEAR</span>
+                        <span class="gauge-label">gear</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Speed Panel -->
-            <div id="speed-panel" class="panel">
-                <div class="panel-header">SPEED</div>
+            <section id="speed-panel" class="panel" aria-label="Speed gauge">
+                <header class="panel-header">Speed</header>
                 <div class="panel-body gauge-body">
                     <canvas id="speed-gauge" width="300" height="300"></canvas>
                     <div class="gauge-overlay">
                         <span id="speed-display" class="speed-number">0</span>
-                        <span class="gauge-label">KM/H</span>
+                        <span class="gauge-label">km/h</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Track Map Panel -->
-            <div id="track-panel" class="panel">
-                <div class="panel-header">TRACK MAP</div>
+            <section id="track-panel" class="panel" aria-label="Track map">
+                <header class="panel-header">Track map</header>
                 <div class="panel-body">
                     <canvas id="track-map" width="400" height="400"></canvas>
                 </div>
-            </div>
+            </section>
 
             <!-- G-Force Panel -->
-            <div id="gforce-panel" class="panel">
-                <div class="panel-header">G-FORCE</div>
+            <section id="gforce-panel" class="panel" aria-label="G-force display">
+                <header class="panel-header">G-force</header>
                 <div class="panel-body gauge-body">
                     <canvas id="gforce-circle" width="250" height="250"></canvas>
                 </div>
-            </div>
+            </section>
 
             <!-- Tires Panel -->
-            <div id="tires-panel" class="panel">
-                <div class="panel-header">TIRE TEMPS</div>
+            <section id="tires-panel" class="panel" aria-label="Tire temperatures">
+                <header class="panel-header">Tire temps</header>
                 <div class="panel-body">
                     <div class="tires-grid">
                         <div id="tire-fl" class="tire-cell">
                             <span class="tire-label">FL</span>
-                            <span class="tire-temp">--&deg;C</span>
+                            <span class="tire-temp">&mdash;&deg;C</span>
                         </div>
                         <div id="tire-fr" class="tire-cell">
                             <span class="tire-label">FR</span>
-                            <span class="tire-temp">--&deg;C</span>
+                            <span class="tire-temp">&mdash;&deg;C</span>
                         </div>
                         <div id="tire-rl" class="tire-cell">
                             <span class="tire-label">RL</span>
-                            <span class="tire-temp">--&deg;C</span>
+                            <span class="tire-temp">&mdash;&deg;C</span>
                         </div>
                         <div id="tire-rr" class="tire-cell">
                             <span class="tire-label">RR</span>
-                            <span class="tire-temp">--&deg;C</span>
+                            <span class="tire-temp">&mdash;&deg;C</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Delta Panel -->
-            <div id="delta-panel" class="panel">
-                <div class="panel-header">LAP DELTA</div>
+            <section id="delta-panel" class="panel" aria-label="Lap delta timing">
+                <header class="panel-header">Lap delta</header>
                 <div class="panel-body">
                     <div class="delta-display">
                         <span id="delta-value" class="delta-time neutral">+0.000</span>
                     </div>
                     <div class="delta-info">
                         <div class="delta-row">
-                            <span class="delta-label">BEST</span>
+                            <span class="delta-label">Best</span>
                             <span id="best-lap" class="delta-val">--:--.---</span>
                         </div>
                         <div class="delta-row">
-                            <span class="delta-label">CURRENT</span>
+                            <span class="delta-label">Current</span>
                             <span id="current-lap" class="delta-val">--:--.---</span>
                         </div>
                         <div class="delta-row">
-                            <span class="delta-label">LAP</span>
+                            <span class="delta-label">Lap</span>
                             <span id="lap-count" class="delta-val">0</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Coach Panel -->
-            <div id="coach-panel" class="panel">
-                <div class="panel-header">
-                    COACH
-                    <span class="coach-badge">LIVE</span>
-                </div>
+            <section id="coach-panel" class="panel" aria-label="AI driving coach">
+                <header class="panel-header">
+                    Coach
+                    <span class="coach-badge">Live</span>
+                </header>
                 <div class="panel-body">
-                    <ul id="coach-feed"></ul>
+                    <ul id="coach-feed" aria-live="polite">
+                        <li class="coach-empty">Waiting for telemetry data...</li>
+                    </ul>
                 </div>
-            </div>
+            </section>
 
             <!-- Inputs Panel -->
-            <div id="inputs-panel" class="panel">
-                <div class="panel-header">INPUTS</div>
+            <section id="inputs-panel" class="panel" aria-label="Driver inputs">
+                <header class="panel-header">Inputs</header>
                 <div class="panel-body">
                     <div class="input-group">
-                        <span class="input-label">THR</span>
+                        <span class="input-label">Thr</span>
                         <div class="input-bar-track">
                             <div id="throttle-bar" class="input-bar throttle" style="width: 0%"></div>
                         </div>
                         <span id="throttle-val" class="input-val">0%</span>
                     </div>
                     <div class="input-group">
-                        <span class="input-label">BRK</span>
+                        <span class="input-label">Brk</span>
                         <div class="input-bar-track">
                             <div id="brake-bar" class="input-bar brake" style="width: 0%"></div>
                         </div>
                         <span id="brake-val" class="input-val">0%</span>
                     </div>
                     <div class="input-group steer-group">
-                        <span class="input-label">STR</span>
+                        <span class="input-label">Str</span>
                         <div class="steer-track">
                             <div class="steer-center"></div>
                             <div id="steer-indicator" class="steer-indicator" style="left: 50%"></div>
@@ -154,18 +165,18 @@
                         <span id="steer-val" class="input-val">0&deg;</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
         </div>
-    </div>
+    </main>
 
     <!-- ========== COMPACT MODE DASHBOARD ========== -->
-    <div id="dashboard-compact">
+    <aside id="dashboard-compact" aria-label="Compact telemetry overlay">
         <div class="compact-strip">
             <div class="compact-cell compact-gear">
                 <span id="compact-gear" class="compact-gear-num">N</span>
                 <span id="compact-speed" class="compact-speed-num">0</span>
-                <span class="compact-unit">KM/H</span>
+                <span class="compact-unit">km/h</span>
             </div>
             <div class="compact-cell compact-inputs">
                 <div class="compact-bar-group">
@@ -182,15 +193,15 @@
                 </div>
             </div>
             <div class="compact-cell compact-delta">
-                <span class="compact-delta-label">DELTA</span>
+                <span class="compact-delta-label">Delta</span>
                 <span id="compact-delta" class="compact-delta-val neutral">+0.000</span>
             </div>
             <div class="compact-cell compact-coach">
-                <span class="compact-coach-label">COACH</span>
+                <span class="compact-coach-label">Coach</span>
                 <span id="compact-coach-msg" class="compact-coach-text">Waiting for data...</span>
             </div>
         </div>
-    </div>
+    </aside>
 
 </body>
 </html>
