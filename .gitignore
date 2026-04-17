@@ -140,3 +140,19 @@ wallet/tnsnames.ora
 wallet/truststore.jks
 wallet/cwallet.sso
 wallet/ojdbc.properties
+
+# Agent/skill directories (local-only, never commit)
+.agents/
+.claude/
+.crush/
+.openhands/
+.serena/
+
+# Generated output & planning artifacts
+dogfood-output/
+docs/plans/
+task_plan.md
+findings.md
+progress.md
+.playwright-mcp/
+content/
