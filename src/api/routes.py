@@ -14,7 +14,7 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 _DASHBOARD_DIR = os.path.join(_PROJECT_ROOT, "dashboard")
 
 
-def create_app(hub=None, db_pool=None) -> FastAPI:
+def create_app(hub=None, db_pool=None, lifespan=None) -> FastAPI:
     """Build and return a configured FastAPI application.
 
     Parameters
@@ -25,9 +25,11 @@ def create_app(hub=None, db_pool=None) -> FastAPI:
     db_pool : object | None
         An Oracle DB connection pool (unused directly by routes, but kept for
         status reporting).
+    lifespan : callable | None
+        Optional ASGI lifespan context manager for startup/shutdown hooks.
     """
 
-    app = FastAPI(title="Forza Telemetry Platform", version="2.0.0")
+    app = FastAPI(title="Forza Telemetry Platform", version="2.0.0", lifespan=lifespan)
 
     # -- REST endpoints -------------------------------------------------------
 

@@ -43,12 +43,19 @@ class UDPProtocol(asyncio.DatagramProtocol):
 class TelemetryHub:
     """Central pipeline: UDP -> parse -> session -> broadcast -> coach -> DB."""
 
+    # Cap on buffered coaching alerts so free-roam sessions (where laps may
+    # never complete to drain the list) cannot grow it without bound.
+    _MAX_RECENT_ALERTS = 200
+
     def __init__(
         self,
         udp_port: int = 65530,
         db_pool=None,
         batch_size: int = 60,
         mode: str = "race",
+        coach_engine=None,
+        car_dna=None,
+        llm_coach=None,
     ) -> None:
         self.udp_port = udp_port
         self.mode = mode
@@ -57,11 +64,12 @@ class TelemetryHub:
         self.ws_mgr = WSManager()
         self.db_writer = BatchedDBWriter(pool=db_pool, batch_size=batch_size)
 
-        self.coach_engine = None  # set externally (CoachEngine instance)
-        self.car_dna = None       # set externally (CarDNA instance)
-        self.llm_coach = None     # set externally (LLMCoach instance)
+        self.coach_engine = coach_engine
+        self.car_dna = car_dna
+        self.llm_coach = llm_coach
         self.packet_count: int = 0
         self._recent_alerts: list = []
+        self._udp_transport: asyncio.DatagramTransport | None = None
 
     # -- packet parsing -------------------------------------------------------
 
@@ -94,16 +102,15 @@ class TelemetryHub:
 
         session_fields = self._session_fields(packet)
 
-        # In race mode, if the race flag is off we still feed session_mgr
-        # (so it can detect race-end transitions) but skip everything else.
+        # Always feed session_mgr so it can detect race start/end and lap
+        # transitions, then decide whether to run the rest of the pipeline.
+        self.session_mgr.update(**session_fields)
+
+        # In race mode, if the race flag is off, skip everything downstream.
         if self.mode == "race" and packet["is_race_on"] == 0:
-            self.session_mgr.update(**session_fields)
             return
 
         self.packet_count += 1
-
-        # Update session / lap state
-        self.session_mgr.update(**session_fields)
 
         # Inject session_id when a session is active
         if self.session_mgr.current_session is not None:
@@ -117,6 +124,9 @@ class TelemetryHub:
             alerts = self.coach_engine.evaluate(packet, self.session_mgr)
             if alerts:
                 self._recent_alerts.extend(alerts)
+                # Bound memory when laps never complete to drain this list.
+                if len(self._recent_alerts) > self._MAX_RECENT_ALERTS:
+                    del self._recent_alerts[: -self._MAX_RECENT_ALERTS]
                 await self.ws_mgr.broadcast("coach", {"type": "alerts", "alerts": alerts})
 
         # Buffer for DB
@@ -136,10 +146,10 @@ class TelemetryHub:
             )
 
             # LLM coaching tip on lap completion
-            if hasattr(self, 'llm_coach') and self.llm_coach and self.llm_coach.enabled:
+            if self.llm_coach is not None and self.llm_coach.enabled:
                 tip = await self.llm_coach.generate_tip(
                     alerts=self._recent_alerts,
-                    lap_stats={"lap_no": last_lap["lap_no"], "lap_time": last_lap.get("lap_time", last_lap.get("lap_time_ms", 0))},
+                    lap_stats={"lap_no": last_lap["lap_no"], "lap_time_ms": last_lap["lap_time_ms"]},
                 )
                 if tip:
                     await self.ws_mgr.broadcast("coach", tip)

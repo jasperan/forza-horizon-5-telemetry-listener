@@ -51,6 +51,7 @@ class ForzaDataPacket:
 
 
     def __init__(self, data):
+        # Strip FH5's 12 unknown bytes at offset 232 so the dash format unpacks.
         patched_data = data[:232] + data[244:323]
         for prop_name, prop_value in zip(self.sled_props + self.dash_props,
             unpack(self.dash_format,
@@ -62,10 +63,8 @@ class ForzaDataPacket:
     @classmethod
     def get_props(cls):
         '''
-        Return the list of properties in the data packet, in order.
-        :param packet_format: which packet format to get properties for,
-                one of either 'sled' or 'dash'
-        :type packet_format: str
+        Return the list of properties in the data packet, in order
+        (the sled fields followed by the dash fields).
         '''
 
         return(cls.sled_props + cls.dash_props)

@@ -1,8 +1,7 @@
 """Forza Telemetry Platform - entry point."""
 import argparse
-import asyncio
 import logging
-import sys
+from contextlib import asynccontextmanager
 
 import uvicorn
 
@@ -45,17 +44,18 @@ def main():
         else:
             logger.warning("Oracle DB unavailable, running in dashboard-only mode")
 
-    # Core hub
-    hub = TelemetryHub(udp_port=args.port, db_pool=db_pool, mode=args.mode)
-    hub.coach_engine = CoachEngine()
-    hub.car_dna = CarDNACollector()
-    hub.llm_coach = LLMCoach(enabled=args.enable_llm)
+    # Core hub with all collaborators injected.
+    hub = TelemetryHub(
+        udp_port=args.port,
+        db_pool=db_pool,
+        mode=args.mode,
+        coach_engine=CoachEngine(),
+        car_dna=CarDNACollector(),
+        llm_coach=LLMCoach(enabled=args.enable_llm),
+    )
 
-    # FastAPI app
-    app = create_app(hub=hub, db_pool=db_pool)
-
-    @app.on_event("startup")
-    async def startup():
+    @asynccontextmanager
+    async def lifespan(app):
         hub._udp_transport = await hub.start_udp()
         logger.info("Forza Telemetry Platform running")
         logger.info("  UDP listener: port %d", args.port)
@@ -64,13 +64,18 @@ def main():
         logger.info("  Mode:         %s", args.mode)
         logger.info("  DB:           %s", "connected" if db_pool else "disabled")
         logger.info("  LLM Coach:    %s", "enabled" if args.enable_llm else "disabled")
+        try:
+            yield
+        finally:
+            if hub._udp_transport:
+                hub._udp_transport.close()
+            # Persist any telemetry still buffered before tearing down the pool.
+            hub.db_writer.flush()
+            if db_pool:
+                db_pool.close()
 
-    @app.on_event("shutdown")
-    async def shutdown():
-        if hub._udp_transport:
-            hub._udp_transport.close()
-        if db_pool:
-            db_pool.close()
+    # FastAPI app
+    app = create_app(hub=hub, db_pool=db_pool, lifespan=lifespan)
 
     uvicorn.run(app, host="0.0.0.0", port=args.web_port, log_level="info")
 
