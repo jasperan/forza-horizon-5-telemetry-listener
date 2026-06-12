@@ -31,7 +31,7 @@ class WSManager:
         try:
             self.connections[channel].remove(websocket)
         except ValueError:
-            pass
+            return
         logger.info(
             "Client disconnected from channel '%s' (total: %d)",
             channel,
