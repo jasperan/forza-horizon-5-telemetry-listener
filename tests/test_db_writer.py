@@ -1,5 +1,4 @@
 """Tests for BatchedDBWriter - buffering and flushing behavior."""
-import pytest
 from unittest.mock import MagicMock
 
 from src.db_writer import BatchedDBWriter
