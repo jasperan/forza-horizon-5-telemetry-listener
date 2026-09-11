@@ -17,6 +17,8 @@ def parse_args():
     p = argparse.ArgumentParser(description="Forza Telemetry Platform")
     p.add_argument("--port", type=int, default=65530, help="UDP listen port (default: 65530)")
     p.add_argument("--web-port", type=int, default=8080, help="HTTP/WS port (default: 8080)")
+    p.add_argument("--web-host", default="127.0.0.1",
+                   help="HTTP/WS bind host (default: 127.0.0.1; use 0.0.0.0 to expose on the LAN)")
     p.add_argument("--mode", choices=["race", "always"], default="race",
                    help="'race' = log only during races, 'always' = log everything")
     p.add_argument("--verbose", action="store_true", help="Enable debug logging")
@@ -77,7 +79,7 @@ def main():
     # FastAPI app
     app = create_app(hub=hub, db_pool=db_pool, lifespan=lifespan)
 
-    uvicorn.run(app, host="0.0.0.0", port=args.web_port, log_level="info")
+    uvicorn.run(app, host=args.web_host, port=args.web_port, log_level="info")
 
 
 if __name__ == "__main__":
