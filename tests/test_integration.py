@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 
 from src.telemetry_hub import TelemetryHub
 from src.coach.engine import CoachEngine
-from src.analytics.car_dna import CarDNACollector
 from src.api.routes import create_app
 from src.data_packet import ForzaDataPacket
 

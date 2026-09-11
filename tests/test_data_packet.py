@@ -1,6 +1,5 @@
 """Tests for ForzaDataPacket."""
 import struct
-import pytest
 import sys
 import os
 

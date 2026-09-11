@@ -1,6 +1,5 @@
 """Tests for the analytics module: lap_analyzer and track_mapper."""
 
-import math
 
 from src.analytics.lap_analyzer import compute_sector_times, compute_performance_vector
 from src.analytics.track_mapper import downsample_positions, compute_track_hash
