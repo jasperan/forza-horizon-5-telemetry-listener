@@ -2,6 +2,7 @@
 
 import os
 import logging
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
@@ -12,6 +13,22 @@ logger = logging.getLogger(__name__)
 # Resolve dashboard path relative to the project root (two levels up from this file).
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _DASHBOARD_DIR = os.path.join(_PROJECT_ROOT, "dashboard")
+
+
+def _is_allowed_ws_origin(origin: str) -> bool:
+    """Return True for loopback dashboard origins or non-browser clients.
+
+    WebSockets are not covered by the same-origin policy, so without this check any
+    website the user visits could open ws://127.0.0.1:<port>/ws/telemetry and read the
+    live telemetry stream. Browsers always send Origin; CLI clients and tests do not.
+    """
+    if not origin:
+        return True
+    try:
+        hostname = urlparse(origin).hostname
+    except ValueError:
+        return False
+    return hostname in {"127.0.0.1", "localhost", "::1"}
 
 
 def create_app(hub=None, db_pool=None, lifespan=None) -> FastAPI:
@@ -85,6 +102,9 @@ def create_app(hub=None, db_pool=None, lifespan=None) -> FastAPI:
 
     @app.websocket("/ws/telemetry")
     async def ws_telemetry(websocket: WebSocket):
+        if not _is_allowed_ws_origin(websocket.headers.get("origin", "")):
+            await websocket.close(code=1008)
+            return
         await websocket.accept()
         if hub is not None:
             await hub.ws_mgr.connect(websocket, "telemetry")
@@ -97,6 +117,9 @@ def create_app(hub=None, db_pool=None, lifespan=None) -> FastAPI:
 
     @app.websocket("/ws/coach")
     async def ws_coach(websocket: WebSocket):
+        if not _is_allowed_ws_origin(websocket.headers.get("origin", "")):
+            await websocket.close(code=1008)
+            return
         await websocket.accept()
         if hub is not None:
             await hub.ws_mgr.connect(websocket, "coach")
