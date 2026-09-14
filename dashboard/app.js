@@ -76,7 +76,8 @@
     // ── WebSocket with Auto-Reconnect ────────────────────────────────────
     class TelemetrySocket {
         constructor(path, onMessage) {
-            this.url = 'ws://' + window.location.host + path;
+            this.url = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + path;
+            this.isTelemetry = path === '/ws/telemetry';
             this.onMessage = onMessage;
             this.reconnectDelay = 2000;
             this.connect();
@@ -91,10 +92,10 @@
                     // ignore malformed messages
                 }
             };
-            this.ws.onopen = () => updateConnectionStatus(true);
-            this.ws.onerror = () => updateConnectionStatus(false);
+            this.ws.onopen = () => { if (this.isTelemetry) updateConnectionStatus(true); };
+            this.ws.onerror = () => { if (this.isTelemetry) updateConnectionStatus(false); };
             this.ws.onclose = () => {
-                updateConnectionStatus(false);
+                if (this.isTelemetry) updateConnectionStatus(false);
                 setTimeout(() => this.connect(), this.reconnectDelay);
             };
         }
@@ -589,6 +590,7 @@
     // ── Telemetry Data Handler ───────────────────────────────────────────
     function onTelemetryData(data) {
         latestData = data;
+        $('session-state').textContent = 'Telemetry streaming · Lap ' + (data.lap_number || 0);
 
         // Detect session change (clear track)
         var sessionId = data.session_id || data.race_id || null;

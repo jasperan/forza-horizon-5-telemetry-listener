@@ -2,6 +2,21 @@
 
 Real-time telemetry platform for Forza Horizon 4/5. Live dashboard, AI driving coach, track mapping, car DNA fingerprinting.
 
+## Find your flow
+
+A driver-focused instrument panel with a larger racing-line view, clear gauges, readable tire temperatures, and a compact overlay. The connection badge follows the telemetry feed independently of the coach connection.
+
+![Forza Horizon telemetry dashboard with synthetic driving data](docs/visuals/telemetry.jpg)
+
+<details><summary>Compact overlay · mobile layout</summary>
+
+![Forza compact telemetry overlay](docs/visuals/compact.jpg)
+<img src="docs/visuals/mobile.jpg" alt="Forza Horizon dashboard on mobile" width="320">
+
+</details>
+
+Actual browser captures with synthetic telemetry and a labeled sample coach note. No game, database, or live inference was connected. [Visual notes](docs/visuals/README.md).
+
 ![telemetry](https://static.gosunoob.com/img/1/2021/11/Telemetry-Forza-Horizon-5-How-to-Turn-on-Telemetry.jpg?raw=true)
 
 ## What's New (v2.0)
