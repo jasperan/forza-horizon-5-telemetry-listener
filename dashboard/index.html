@@ -11,9 +11,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/dashboard/style.css">
+    <link rel="stylesheet" href="/dashboard/race-deck.css">
     <script src="/dashboard/app.js" defer></script>
 </head>
 <body data-mode="full">
+    <a class="deck-skip" href="#dashboard-full">Skip to telemetry</a>
+    <header class="deck-brand"><span class="deck-mark" aria-hidden="true">//</span><strong>HORIZON<span>TELEMETRY</span></strong><span class="deck-edition">FORZA HORIZON 4 / 5</span></header>
 
     <!-- Grain overlay for texture -->
     <div class="grain-overlay" aria-hidden="true"></div>
@@ -33,7 +36,8 @@
     </nav>
 
     <!-- ========== FULL MODE DASHBOARD ========== -->
-    <main id="dashboard-full">
+    <main id="dashboard-full" tabindex="-1">
+        <section class="deck-overview" aria-labelledby="deck-title"><div><p>THE DRIVER'S INSTRUMENT PANEL</p><h1 id="deck-title">Find your <em>flow.</em></h1></div><div class="deck-session"><span id="session-state">Waiting for your next drive</span><p>Enable Data Out in Forza to start streaming.</p></div></section>
         <div class="grid-container">
 
             <!-- RPM Panel -->
@@ -42,7 +46,7 @@
                 <div class="panel-body gauge-body">
                     <canvas id="rpm-gauge" width="300" height="300"></canvas>
                     <div class="gauge-overlay">
-                        <span id="gear-display" class="gear-number">N</span>
+                        <span id="gear-display" class="gear-number">—</span>
                         <span class="gauge-label">gear</span>
                     </div>
                 </div>
@@ -54,7 +58,7 @@
                 <div class="panel-body gauge-body">
                     <canvas id="speed-gauge" width="300" height="300"></canvas>
                     <div class="gauge-overlay">
-                        <span id="speed-display" class="speed-number">0</span>
+                        <span id="speed-display" class="speed-number">—</span>
                         <span class="gauge-label">km/h</span>
                     </div>
                 </div>
@@ -62,7 +66,7 @@
 
             <!-- Track Map Panel -->
             <section id="track-panel" class="panel" aria-label="Track map">
-                <header class="panel-header">Track map</header>
+                <header class="panel-header">Your racing line <span class="deck-panel-note">POSITION / SPEED</span></header>
                 <div class="panel-body">
                     <canvas id="track-map" width="400" height="400"></canvas>
                 </div>
@@ -129,11 +133,11 @@
             <section id="coach-panel" class="panel" aria-label="AI driving coach">
                 <header class="panel-header">
                     Coach
-                    <span class="coach-badge">Live</span>
+                    <span class="coach-badge">Insights</span>
                 </header>
                 <div class="panel-body">
                     <ul id="coach-feed" aria-live="polite">
-                        <li class="coach-empty">Waiting for telemetry data...</li>
+                        <li class="coach-empty">Your driving notes will appear here once telemetry arrives.</li>
                     </ul>
                 </div>
             </section>
