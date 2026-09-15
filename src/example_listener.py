@@ -26,4 +26,3 @@ while(True):
     address = bytesAddressPair[1]
 
     print("Message from Client: {} {} {}".format(str(message), type(str(message)), str(message).encode('ascii').decode("utf-8")))
-    #print("Client IP Address: {}".format(address))
