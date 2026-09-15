@@ -1,6 +1,5 @@
 """Tests for the AI coach heuristic rule engine."""
 
-import pytest
 from src.session_manager import SessionManager
 from src.coach.engine import CoachEngine
 

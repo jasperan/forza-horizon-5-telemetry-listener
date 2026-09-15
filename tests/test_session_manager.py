@@ -1,4 +1,3 @@
-import pytest
 from src.session_manager import SessionManager
 
 def test_new_session_on_race_start():
