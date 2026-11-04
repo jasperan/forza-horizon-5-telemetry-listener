@@ -41,6 +41,7 @@
         currentLap: $('current-lap'),
         lapCount: $('lap-count'),
         coachFeed: $('coach-feed'),
+        coachBadge: $('coach-badge'),
         throttleBar: $('throttle-bar'),
         brakeBar: $('brake-bar'),
         steerIndicator: $('steer-indicator'),
@@ -50,8 +51,6 @@
         // Compact mode
         compactGear: $('compact-gear'),
         compactSpeed: $('compact-speed'),
-        compactThrottle: $('compact-throttle'),
-        compactBrake: $('compact-brake'),
         compactDelta: $('compact-delta'),
         compactCoachMsg: $('compact-coach-msg'),
     };
@@ -71,6 +70,8 @@
             dom.connectionStatus.className = 'disconnected';
             dom.statusText.textContent = 'Disconnected';
         }
+        // The coach badge claims a live stream, so it only shows while one exists.
+        dom.coachBadge.classList.toggle('is-off', !connected);
     }
 
     // ── WebSocket with Auto-Reconnect ────────────────────────────────────
@@ -523,10 +524,6 @@
         steerPct = Math.max(0, Math.min(100, steerPct));
         dom.steerIndicator.style.left = steerPct + '%';
         dom.steerVal.textContent = Math.round(steer) + '\u00B0';
-
-        // Compact mode
-        dom.compactThrottle.style.width = throttlePct + '%';
-        dom.compactBrake.style.width = brakePct + '%';
     }
 
     // ── Gear + Speed (DOM overlay) ───────────────────────────────────────
