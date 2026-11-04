@@ -1,447 +1,169 @@
-:root {
-  --bg: #171a1a;
-  --bg-raised: #202525;
-  --border: #3b4441;
-  --border-hover: #617069;
-  --text: #eee9da;
-  --text-secondary: #afb3a7;
-  --text-tertiary: #818b80;
-  --accent: #e7ac74;
-  --radius-lg: 8px;
-}
-body[data-mode="full"] {
-  overflow: auto;
-}
-.grain-overlay {
-  opacity: 0.012;
-}
+/* ==========================================================================
+   Deck chrome: brand bar, session overview, skip link.
+   Structure only -- every colour, radius and type step comes from style.css.
+   ========================================================================== */
+
+/* -- Skip link ------------------------------------------------------------ */
 .deck-skip {
-  position: fixed;
-  top: 10px;
-  left: 12px;
-  padding: 12px;
-  background: var(--accent);
-  color: var(--bg);
-  z-index: 300;
-  transform: translateY(-180%);
-  text-decoration: none;
+    position: fixed;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    background: var(--accent);
+    color: var(--bg);
+    font: 500 12px/1 var(--font);
+    text-decoration: none;
+    z-index: 300;
+    transform: translateY(-200%);
+    transition: transform var(--duration-fast) var(--ease-out);
 }
+
 .deck-skip:focus {
-  transform: none;
+    transform: none;
 }
+
+/* -- Brand bar ------------------------------------------------------------ */
 .deck-brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  min-height: 75px;
-  padding: 15px 35px;
-  border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: 60px;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border);
 }
-.deck-mark {
-  color: var(--accent);
-  font: bold 40px/1 monospace;
-  letter-spacing: -12px;
-  padding-right: 8px;
-}
+
 .deck-brand strong {
-  font-size: 17px;
-  letter-spacing: 1px;
-  line-height: 1.1;
+    font: 500 15px/1.2 var(--font);
+    color: var(--text);
 }
-.deck-brand strong > span {
-  display: block;
-  color: var(--text-secondary);
-  font: 8px var(--font-mono);
-  letter-spacing: 2.7px;
-  margin-top: 5px;
-}
+
 .deck-edition {
-  margin-left: 23px;
-  padding-left: 23px;
-  border-left: 1px solid var(--border);
-  font: 9px var(--font-mono);
-  color: var(--text-secondary);
-  letter-spacing: 1px;
+    padding-left: var(--space-md);
+    border-left: 1px solid var(--border);
+    font: 500 11px/1 var(--font);
+    color: var(--text-secondary);
 }
-#top-bar {
-  position: absolute;
-  top: 20px;
-  right: 35px;
-}
-#connection-status {
-  border-radius: 5px;
-  font-size: 9px;
-  padding: 10px 13px;
-}
-#mode-toggle {
-  min-height: 36px;
-  min-width: 40px;
-  border-radius: 5px;
-}
-#dashboard-full {
-  max-width: 1600px;
-  height: auto;
-  margin: auto;
-  padding: 0 35px 35px;
-}
-.deck-overview {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 35px 0 29px;
-  gap: 25px;
-}
-.deck-overview > div > p:first-child {
-  font: 9px var(--font-mono);
-  letter-spacing: 1.6px;
-  color: var(--accent);
-}
-.deck-overview h1 {
-  font-size: 48px;
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -2px;
-  margin-top: 12px;
-}
-.deck-overview h1 em {
-  font-family: Georgia, serif;
-  font-weight: 400;
-  color: var(--accent);
-}
-.deck-session {
-  text-align: right;
-  border-left: 1px solid var(--border);
-  padding: 5px 0 5px 25px;
-}
-.deck-session > span {
-  font-size: 13px;
-}
-.deck-session > p {
-  font-size: 10px;
-  color: var(--text-secondary);
-  margin-top: 8px;
-}
-.grid-container {
-  grid-template-columns: 1fr 1fr 1.1fr 1.1fr;
-  grid-template-rows: 290px 230px 210px;
-  gap: 13px;
-  height: auto;
-}
-.panel {
-  padding: 18px;
-  box-shadow: none;
-}
-.panel:hover {
-  box-shadow: none;
-}
-.panel::before {
-  display: none;
-}
-.panel-header {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0.2px;
-  padding-bottom: 13px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 15px;
-}
-.deck-panel-note {
-  margin-left: auto;
-  color: #8e9a8e;
-  font: 8px var(--font-mono);
-  letter-spacing: 1px;
-}
-#rpm-panel {
-  grid-column: 1;
-  grid-row: 1;
-}
-#speed-panel {
-  grid-column: 2;
-  grid-row: 1;
-  border-top: 2px solid var(--accent);
-}
-#track-panel {
-  grid-column: 3/5;
-  grid-row: 1/3;
-  background:
-    radial-gradient(ellipse at 50% 40%, #34413670, transparent 70%), #1c2220;
-}
-#gforce-panel {
-  grid-column: 1;
-  grid-row: 2;
-}
-#tires-panel {
-  grid-column: 2;
-  grid-row: 2;
-}
-#delta-panel {
-  grid-column: 1;
-  grid-row: 3;
-}
-#coach-panel {
-  grid-column: 2/4;
-  grid-row: 3;
-}
-#inputs-panel {
-  grid-column: 4;
-  grid-row: 3;
-}
-.gauge-body {
-  min-height: 0;
-}
-.gauge-body canvas {
-  max-height: 100%;
-  width: auto;
-  object-fit: contain;
-}
-#rpm-gauge,
-#speed-gauge {
-  width: 220px;
-  height: 220px;
-  max-width: 100%;
-  max-height: 100%;
-}
-#gforce-circle {
-  width: 165px;
-  height: 165px;
-  max-height: 100%;
-}
-.gear-number,
-.speed-number {
-  font-size: 60px;
-  text-shadow: none;
-}
-.gauge-label {
-  color: #a8b19d;
-  font-size: 10px;
-}
-.tires-grid {
-  width: 100%;
-  gap: 10px;
-}
-.tire-cell {
-  min-height: 65px;
-  border-radius: 5px;
-}
-.tire-temp {
-  font-size: 23px;
-}
-.tire-label {
-  font-size: 9px;
-}
-.delta-time {
-  font-size: 39px;
-}
-.delta-info {
-  font-size: 11px;
-}
-.coach-empty {
-  line-height: 1.9;
-  padding: 20px;
-  font-size: 12px;
-}
-.input-label {
-  font-size: 10px;
-}
-.input-val {
-  font-size: 11px;
-}
-#track-map {
-  width: 100%;
-  max-height: 440px;
-  object-fit: contain;
-}
-.coach-badge {
-  border-radius: 3px;
-  font-size: 8px;
-}
+
+/* Compact mode keeps only the strip, so the brand bar steps aside. */
 body[data-mode="compact"] .deck-brand,
 body[data-mode="compact"] .deck-overview {
-  display: none;
-}
-body[data-mode="compact"] #top-bar {
-  position: fixed;
-}
-body[data-mode="compact"] .compact-strip {
-  border-color: #6f725e;
-  background: #171d1cf2;
-}
-@media (max-width: 1100px) {
-  .deck-brand {
-    padding-inline: 22px;
-  }
-  #top-bar {
-    right: 22px;
-  }
-  #dashboard-full {
-    padding-inline: 22px;
-  }
-  .grid-container {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 290px 360px 230px 220px;
-  }
-  #track-panel {
-    grid-column: 1/3;
-    grid-row: 2;
-  }
-  #gforce-panel {
-    grid-column: 1;
-    grid-row: 3;
-  }
-  #tires-panel {
-    grid-column: 2;
-    grid-row: 3;
-  }
-  #delta-panel {
-    grid-column: 1;
-    grid-row: 4;
-  }
-  #inputs-panel {
-    grid-column: 2;
-    grid-row: 4;
-  }
-  #coach-panel {
-    grid-column: 1/3;
-    grid-row: 5;
-    min-height: 190px;
-  }
-  #track-map {
-    max-height: 290px;
-  }
-  .deck-edition {
     display: none;
-  }
 }
-@media (max-width: 600px) {
-  .deck-brand {
-    min-height: 70px;
-    padding: 14px;
-  }
-  .deck-brand strong {
-    font-size: 14px;
-  }
-  .deck-brand strong > span {
-    font-size: 7px;
-  }
-  .deck-mark {
-    font-size: 33px;
-  }
-  #top-bar {
-    right: 14px;
-    top: 18px;
-  }
-  #connection-status {
-    padding: 9px;
-    font-size: 8px;
-  }
-  #mode-toggle {
-    min-width: 34px;
-  }
-  #dashboard-full {
-    padding: 0 14px 22px;
-  }
-  .deck-overview {
-    display: block;
-    padding: 27px 0;
-  }
-  .deck-overview h1 {
-    font-size: 43px;
-  }
-  .deck-session {
-    text-align: left;
-    border-left: 0;
-    padding: 0;
-    margin-top: 20px;
-  }
-  .deck-session > span {
-    font-size: 12px;
-  }
-  .deck-overview > div > p:first-child {
-    font-size: 8px;
-  }
-  .grid-container {
-    gap: 10px;
-    grid-template-rows: 210px 310px 190px 200px;
-  }
-  .panel {
-    padding: 11px;
-  }
-  .panel-header {
-    font-size: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-  }
-  .deck-panel-note {
-    font-size: 7px;
-  }
-  .gear-number,
-  .speed-number {
-    font-size: 41px;
-  }
-  #rpm-gauge,
-  #speed-gauge {
-    width: 160px;
-    height: 160px;
-  }
-  #gforce-circle {
-    width: 130px;
-    height: 130px;
-  }
-  .gauge-label {
-    font-size: 8px;
-  }
-  .tire-temp {
-    font-size: 16px;
-  }
-  .tire-cell {
-    min-height: 54px;
-  }
-  .tires-grid {
-    gap: 6px;
-  }
-  .delta-time {
-    font-size: 27px;
-  }
-  .input-group {
-    gap: 5px;
-  }
-  .input-label {
-    width: 23px;
-    font-size: 8px;
-  }
-  .input-val {
-    font-size: 9px;
-  }
-  .delta-row {
-    font-size: 9px;
-  }
-  body[data-mode="compact"] .compact-strip {
+
+/* -- Session overview ----------------------------------------------------- */
+.deck-overview {
+    display: flex;
     flex-wrap: wrap;
-    max-width: 100%;
-  }
-  .compact-cell {
-    min-width: 0;
-  }
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding: var(--space-xl) 0 var(--space-lg);
 }
-.tire-cell {
-  padding: 8px;
-  min-width: 0;
+
+.deck-kicker {
+    font: 500 11px/1 var(--font);
+    color: var(--accent);
 }
-.tires-grid {
-  max-width: 220px;
-  height: 100%;
-  max-height: 155px;
+
+.deck-overview h1 {
+    margin-top: var(--space-sm);
+    font: 400 40px/1.05 var(--font);
+    letter-spacing: -0.03em;
+    color: var(--text);
 }
-.tire-label {
-  margin-bottom: 3px;
+
+.deck-overview h1 em {
+    font-style: normal;
+    color: var(--accent);
 }
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
+
+.deck-session {
+    padding-left: var(--space-lg);
+    border-left: 1px solid var(--border);
+    text-align: right;
+}
+
+.deck-session > span {
+    font: 400 13px/1.4 var(--font);
+    color: var(--text);
+}
+
+.deck-session > p {
+    margin-top: var(--space-xs);
+    font: 400 11px/1.4 var(--font);
+    color: var(--text-secondary);
+}
+
+.deck-panel-note {
+    margin-left: auto;
+    font: 400 11px/1 var(--font);
+    color: var(--text-tertiary);
+}
+
+/* -- Page column ---------------------------------------------------------- */
+body[data-mode="full"] {
+    overflow: auto;
+}
+
+#dashboard-full {
+    max-width: 1600px;
+    height: auto;
+    margin: 0 auto;
+    padding: 0 var(--space-md) var(--space-md);
+}
+
+/* The grid fills the wall display: whatever the header and overview leave. */
+body[data-mode="full"] .grid-container {
+    height: calc(100dvh - 236px);
+    min-height: 620px;
+}
+
+@media (max-width: 1180px) {
+    .deck-brand {
+        padding-inline: var(--space-md);
+    }
+    .deck-overview {
+        padding: var(--space-lg) 0;
+    }
+    .deck-overview h1 {
+        font-size: 34px;
+    }
+}
+
+@media (max-width: 700px) {
+    .deck-edition {
+        display: none;
+    }
+    .deck-overview {
+        display: block;
+    }
+    .deck-session {
+        margin-top: var(--space-md);
+        padding-left: 0;
+        border-left: 0;
+        text-align: left;
+    }
+    .deck-overview h1 {
+        font-size: 30px;
+    }
+    body[data-mode="full"] .grid-container {
+        height: auto;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        grid-auto-rows: minmax(220px, auto);
+    }
+    /* One column: every panel keeps its natural height instead of a slot. */
+    #track-panel,
+    #rpm-panel,
+    #speed-panel,
+    #gforce-panel,
+    #tires-panel,
+    #delta-panel,
+    #inputs-panel,
+    #coach-panel {
+        grid-column: 1;
+        grid-row: auto;
+    }
 }

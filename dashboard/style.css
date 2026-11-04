@@ -1,13 +1,14 @@
 /* ==========================================================================
    Forza Telemetry Dashboard
-   Premium dark theme. Geist font family. Zero dependencies.
+   A pit-wall monitor: matte black surfaces, amber readouts, hairline scales.
+   Geist for labels, Geist Mono for every figure. Zero dependencies.
    ========================================================================== */
 
 /* -- Design Tokens -------------------------------------------------------- */
 :root {
     /* Surface palette: cool-tinted dark */
     --bg: #0c0c14;
-    --bg-raised: rgba(16, 16, 28, 0.92);
+    --bg-raised: #111120;
     --bg-subtle: rgba(255, 255, 255, 0.025);
     --border: rgba(255, 255, 255, 0.07);
     --border-hover: rgba(255, 255, 255, 0.14);
@@ -88,22 +89,10 @@ body {
     min-height: 100dvh;
 }
 
-/* -- Grain Overlay -------------------------------------------------------- */
-.grain-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-overlay);
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 256px 256px;
-}
-
 /* -- Top Bar (Connection + Mode Toggle) ----------------------------------- */
 #top-bar {
     position: fixed;
-    top: var(--space-md);
+    top: 12px;
     right: var(--space-md);
     z-index: var(--z-topbar);
     display: flex;
@@ -114,18 +103,14 @@ body {
 #connection-status {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
+    gap: 8px;
+    padding: 6px 12px;
     border-radius: 100px;
     background: var(--bg-raised);
     border: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    font-size: 10px;
+    font-size: 11px;
     font-family: var(--font-mono);
     font-weight: 500;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
     transition: border-color var(--duration-normal) var(--ease-out);
 }
 
@@ -134,14 +119,12 @@ body {
     height: 7px;
     border-radius: 50%;
     background: var(--negative);
-    transition: background var(--duration-normal) var(--ease-out),
-                box-shadow var(--duration-normal) var(--ease-out);
+    transition: background var(--duration-normal) var(--ease-out);
     flex-shrink: 0;
 }
 
 #connection-status.connected .status-dot {
     background: var(--positive);
-    box-shadow: 0 0 6px var(--positive);
     animation: pulse-dot 2.5s ease-in-out infinite;
 }
 
@@ -162,8 +145,6 @@ body {
 #mode-toggle {
     background: var(--bg-raised);
     border: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     color: var(--text-secondary);
     width: 36px;
     height: 36px;
@@ -198,54 +179,46 @@ body {
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--space-md) var(--space-md) calc(var(--space-md) + 2px);
+    padding: var(--space-md);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
-    transition: border-color var(--duration-normal) var(--ease-out),
-                box-shadow var(--duration-normal) var(--ease-out);
-}
-
-/* Subtle inner highlight on top edge (glass refraction simulation) */
-.panel::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.06) 30%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0.06) 70%,
-        transparent 100%
-    );
-    pointer-events: none;
+    transition: border-color var(--duration-normal) var(--ease-out);
 }
 
 .panel:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+/* Header rule, with the amber tick that repeats across the dashboard. */
 .panel-header {
+    position: relative;
     font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.8px;
+    font-weight: 500;
     color: var(--text-secondary);
     margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    text-transform: uppercase;
+}
+
+.panel-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.75;
 }
 
 .panel-body {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -254,27 +227,43 @@ body {
 
 /* -- Full Mode Grid Layout ------------------------------------------------ */
 #dashboard-full {
-    padding: var(--space-md);
+    padding: 56px var(--space-md) var(--space-md);
     height: 100dvh;
 }
 
+/* The track map is the one dominant panel; everything else is a readout
+   around it. */
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    gap: var(--space-sm);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: var(--space-md);
     height: 100%;
 }
 
-/* Panel placement */
-#rpm-panel     { grid-column: 1; grid-row: 1; }
-#speed-panel   { grid-column: 2; grid-row: 1; }
-#track-panel   { grid-column: 3; grid-row: 1 / 3; }
-#gforce-panel  { grid-column: 1; grid-row: 2; }
-#tires-panel   { grid-column: 2; grid-row: 2; }
+#track-panel   { grid-column: 1 / 3; grid-row: 1 / 3; }
+#rpm-panel     { grid-column: 3; grid-row: 1; }
+#speed-panel   { grid-column: 4; grid-row: 1; }
+#gforce-panel  { grid-column: 3; grid-row: 2; }
+#tires-panel   { grid-column: 4; grid-row: 2; }
 #delta-panel   { grid-column: 1; grid-row: 3; }
-#coach-panel   { grid-column: 2; grid-row: 3; }
-#inputs-panel  { grid-column: 3; grid-row: 3; }
+#inputs-panel  { grid-column: 2; grid-row: 3; }
+#coach-panel   { grid-column: 3 / 5; grid-row: 3; }
+
+@media (max-width: 1180px) {
+    .grid-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(4, minmax(0, 1fr));
+    }
+    #track-panel   { grid-column: 1 / 3; grid-row: 1 / 3; }
+    #rpm-panel     { grid-column: 3; grid-row: 1; }
+    #speed-panel   { grid-column: 3; grid-row: 2; }
+    #gforce-panel  { grid-column: 1; grid-row: 3; }
+    #tires-panel   { grid-column: 2; grid-row: 3; }
+    #delta-panel   { grid-column: 3; grid-row: 3; }
+    #coach-panel   { grid-column: 1 / 3; grid-row: 4; }
+    #inputs-panel  { grid-column: 3; grid-row: 4; }
+}
 
 /* -- Gauge Panels (RPM + Speed) ------------------------------------------- */
 .gauge-body {
@@ -282,8 +271,9 @@ body {
 }
 
 .gauge-body canvas {
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .gauge-overlay {
@@ -299,31 +289,36 @@ body {
 
 .gear-number {
     font-family: var(--font-mono);
-    font-size: 68px;
-    font-weight: 800;
+    font-size: 64px;
+    font-weight: 600;
     line-height: 1;
     color: var(--text);
-    letter-spacing: -3px;
-    text-shadow: 0 0 30px rgba(224, 144, 64, 0.2);
 }
 
 .speed-number {
     font-family: var(--font-mono);
-    font-size: 52px;
-    font-weight: 700;
+    font-size: 48px;
+    font-weight: 600;
     line-height: 1;
     color: var(--text);
-    letter-spacing: -2px;
-    text-shadow: 0 0 30px rgba(84, 136, 180, 0.2);
 }
 
 .gauge-label {
     font-size: 10px;
     font-weight: 500;
-    letter-spacing: 1.5px;
     color: var(--text-tertiary);
     margin-top: var(--space-xs);
-    text-transform: lowercase;
+}
+
+/* The amber rule under the gear figure is the signature; it reappears
+   under every panel header. */
+.gauge-overlay::after {
+    content: '';
+    width: 24px;
+    height: 1px;
+    margin-top: var(--space-sm);
+    background: var(--accent);
+    opacity: 0.75;
 }
 
 /* -- Track Map ------------------------------------------------------------ */
@@ -333,14 +328,16 @@ body {
 }
 
 #track-map {
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 /* -- G-Force -------------------------------------------------------------- */
 #gforce-circle {
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 /* -- Tire Temps ----------------------------------------------------------- */
@@ -359,20 +356,18 @@ body {
     align-items: center;
     justify-content: center;
     padding: 14px 10px;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     background: var(--bg-subtle);
     border: 1px solid var(--border);
     min-width: 85px;
     min-height: 85px;
     transition: background var(--duration-normal) var(--ease-out),
-                border-color var(--duration-normal) var(--ease-out),
-                box-shadow var(--duration-normal) var(--ease-out);
+                border-color var(--duration-normal) var(--ease-out);
 }
 
 .tire-label {
     font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-weight: 500;
     color: var(--text-secondary);
     margin-bottom: var(--space-xs);
 }
@@ -380,30 +375,26 @@ body {
 .tire-temp {
     font-family: var(--font-mono);
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text);
-    letter-spacing: -0.5px;
 }
 
 /* Tire temperature states */
 .tire-cell.cold {
     border-color: rgba(84, 136, 180, 0.35);
-    background: rgba(84, 136, 180, 0.06);
-    box-shadow: inset 0 0 16px rgba(84, 136, 180, 0.04);
+    background: rgba(84, 136, 180, 0.08);
 }
 .tire-cell.cold .tire-temp { color: var(--tire-cold); }
 
 .tire-cell.optimal {
     border-color: rgba(76, 175, 130, 0.35);
-    background: rgba(76, 175, 130, 0.06);
-    box-shadow: inset 0 0 16px rgba(76, 175, 130, 0.04);
+    background: rgba(76, 175, 130, 0.08);
 }
 .tire-cell.optimal .tire-temp { color: var(--tire-optimal); }
 
 .tire-cell.hot {
     border-color: rgba(212, 84, 84, 0.35);
-    background: rgba(212, 84, 84, 0.06);
-    box-shadow: inset 0 0 16px rgba(212, 84, 84, 0.04);
+    background: rgba(212, 84, 84, 0.08);
 }
 .tire-cell.hot .tire-temp { color: var(--tire-hot); }
 
@@ -414,9 +405,8 @@ body {
 
 .delta-time {
     font-family: var(--font-mono);
-    font-size: 40px;
-    font-weight: 700;
-    letter-spacing: -1.5px;
+    font-size: 36px;
+    font-weight: 600;
     transition: color var(--duration-normal) var(--ease-out);
 }
 
@@ -441,8 +431,8 @@ body {
 }
 
 .delta-label {
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 400;
     color: var(--text-secondary);
 }
 
@@ -455,21 +445,15 @@ body {
 
 /* -- Coach Feed ----------------------------------------------------------- */
 .coach-badge {
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: var(--accent);
-    color: var(--bg);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    animation: pulse-badge 2.5s ease-in-out infinite;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(224, 144, 64, 0.14);
+    color: var(--accent);
 }
 
-@keyframes pulse-badge {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
-}
+.coach-badge.is-off { display: none; }
 
 #coach-panel .panel-body {
     align-items: stretch;
@@ -553,9 +537,8 @@ body {
 }
 
 .input-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    font-size: 11px;
+    font-weight: 500;
     color: var(--text-secondary);
     width: 28px;
     flex-shrink: 0;
@@ -576,15 +559,8 @@ body {
     transition: width 0.05s linear;
 }
 
-.input-bar.throttle {
-    background: var(--throttle);
-    box-shadow: 0 0 10px rgba(76, 175, 130, 0.2);
-}
-
-.input-bar.brake {
-    background: var(--brake);
-    box-shadow: 0 0 10px rgba(212, 84, 84, 0.2);
-}
+.input-bar.throttle { background: var(--throttle); }
+.input-bar.brake    { background: var(--brake); }
 
 .input-val {
     font-family: var(--font-mono);
@@ -623,7 +599,6 @@ body {
     height: 12px;
     border-radius: 50%;
     background: var(--steer);
-    box-shadow: 0 0 8px rgba(84, 136, 180, 0.3);
     transition: left 0.05s linear;
 }
 
@@ -642,11 +617,9 @@ body[data-mode="full"] #dashboard-compact { display: none; }
 .compact-strip {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--space-xs);
     padding: var(--space-sm) var(--space-md);
-    background: rgba(12, 12, 20, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: var(--bg-raised);
     border-bottom: 1px solid var(--border);
 }
 
@@ -665,71 +638,28 @@ body[data-mode="full"] #dashboard-compact { display: none; }
 
 .compact-gear-num {
     font-family: var(--font-mono);
-    font-size: 30px;
-    font-weight: 800;
+    font-size: 28px;
+    font-weight: 600;
     color: var(--text);
     line-height: 1;
-    letter-spacing: -1px;
 }
 
 .compact-speed-num {
     font-family: var(--font-mono);
     font-size: 22px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text);
     line-height: 1;
-    letter-spacing: -0.5px;
 }
 
 .compact-unit {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 500;
     color: var(--text-tertiary);
-    letter-spacing: 0.8px;
-    margin-left: 2px;
+    margin-left: 4px;
     align-self: flex-end;
     margin-bottom: 2px;
 }
-
-/* Compact: Throttle/Brake micro-bars */
-.compact-inputs {
-    flex-direction: column;
-    gap: 3px;
-    min-width: 100px;
-    border-right: 1px solid var(--border);
-    padding-right: var(--space-md);
-}
-
-.compact-bar-group {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    width: 100%;
-}
-
-.compact-bar-label {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--text-tertiary);
-    width: 10px;
-}
-
-.compact-bar-track {
-    flex: 1;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.compact-bar {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.05s linear;
-}
-
-.compact-bar.throttle { background: var(--throttle); }
-.compact-bar.brake    { background: var(--brake); }
 
 /* Compact: Delta */
 .compact-delta {
@@ -741,17 +671,15 @@ body[data-mode="full"] #dashboard-compact { display: none; }
 }
 
 .compact-delta-label {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.8px;
     color: var(--text-tertiary);
 }
 
 .compact-delta-val {
     font-family: var(--font-mono);
     font-size: 17px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-weight: 600;
 }
 
 .compact-delta-val.positive { color: var(--negative); }
@@ -767,9 +695,8 @@ body[data-mode="full"] #dashboard-compact { display: none; }
 }
 
 .compact-coach-label {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.8px;
     color: var(--text-tertiary);
 }
 
@@ -787,18 +714,6 @@ body[data-mode="full"] #dashboard-compact { display: none; }
 canvas {
     display: block;
     max-width: 100%;
-    height: auto;
-}
-
-/* -- Utility Animations --------------------------------------------------- */
-@keyframes glow-red {
-    0%, 100% { box-shadow: 0 0 4px rgba(212, 84, 84, 0.15); }
-    50% { box-shadow: 0 0 14px rgba(212, 84, 84, 0.35); }
-}
-
-@keyframes glow-green {
-    0%, 100% { box-shadow: 0 0 4px rgba(76, 175, 130, 0.15); }
-    50% { box-shadow: 0 0 14px rgba(76, 175, 130, 0.35); }
 }
 
 /* -- Scrollbar (Webkit) --------------------------------------------------- */

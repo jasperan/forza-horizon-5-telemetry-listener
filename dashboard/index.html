@@ -6,7 +6,7 @@
     <meta name="description" content="Real-time telemetry dashboard for Forza Horizon 4/5 with live driving stats, AI coach, and track mapping.">
     <meta name="theme-color" content="#0c0c14">
     <title>Forza Telemetry</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230c0c14'/><path d='M7 22a9 9 0 1 1 18 0' fill='none' stroke='%23e09040' stroke-width='2.5' stroke-linecap='round'/><path d='M16 22l5-6' fill='none' stroke='%23e8e8ec' stroke-width='2' stroke-linecap='round'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,10 +16,10 @@
 </head>
 <body data-mode="full">
     <a class="deck-skip" href="#dashboard-full">Skip to telemetry</a>
-    <header class="deck-brand"><span class="deck-mark" aria-hidden="true">//</span><strong>HORIZON<span>TELEMETRY</span></strong><span class="deck-edition">FORZA HORIZON 4 / 5</span></header>
-
-    <!-- Grain overlay for texture -->
-    <div class="grain-overlay" aria-hidden="true"></div>
+    <header class="deck-brand">
+        <strong>Horizon telemetry</strong>
+        <span class="deck-edition">Forza Horizon 4 / 5</span>
+    </header>
 
     <!-- Connection status -->
     <nav id="top-bar" aria-label="Dashboard controls">
@@ -37,7 +37,16 @@
 
     <!-- ========== FULL MODE DASHBOARD ========== -->
     <main id="dashboard-full" tabindex="-1">
-        <section class="deck-overview" aria-labelledby="deck-title"><div><p>THE DRIVER'S INSTRUMENT PANEL</p><h1 id="deck-title">Find your <em>flow.</em></h1></div><div class="deck-session"><span id="session-state">Waiting for your next drive</span><p>Enable Data Out in Forza to start streaming.</p></div></section>
+        <section class="deck-overview" aria-labelledby="deck-title">
+            <div>
+                <p class="deck-kicker">The driver's instrument panel</p>
+                <h1 id="deck-title">Find your <em>flow.</em></h1>
+            </div>
+            <div class="deck-session">
+                <span id="session-state">Waiting for your next drive</span>
+                <p>Enable Data Out in Forza to start streaming.</p>
+            </div>
+        </section>
         <div class="grid-container">
 
             <!-- RPM Panel -->
@@ -66,7 +75,7 @@
 
             <!-- Track Map Panel -->
             <section id="track-panel" class="panel" aria-label="Track map">
-                <header class="panel-header">Your racing line <span class="deck-panel-note">POSITION / SPEED</span></header>
+                <header class="panel-header">Your racing line <span class="deck-panel-note">Position and speed</span></header>
                 <div class="panel-body">
                     <canvas id="track-map" width="400" height="400"></canvas>
                 </div>
@@ -133,11 +142,11 @@
             <section id="coach-panel" class="panel" aria-label="AI driving coach">
                 <header class="panel-header">
                     Coach
-                    <span class="coach-badge">Insights</span>
+                    <span id="coach-badge" class="coach-badge is-off">Live</span>
                 </header>
                 <div class="panel-body">
                     <ul id="coach-feed" aria-live="polite">
-                        <li class="coach-empty">Your driving notes will appear here once telemetry arrives.</li>
+                        <li class="coach-empty">Waiting for telemetry</li>
                     </ul>
                 </div>
             </section>
@@ -181,20 +190,6 @@
                 <span id="compact-gear" class="compact-gear-num">N</span>
                 <span id="compact-speed" class="compact-speed-num">0</span>
                 <span class="compact-unit">km/h</span>
-            </div>
-            <div class="compact-cell compact-inputs">
-                <div class="compact-bar-group">
-                    <span class="compact-bar-label">T</span>
-                    <div class="compact-bar-track">
-                        <div id="compact-throttle" class="compact-bar throttle" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="compact-bar-group">
-                    <span class="compact-bar-label">B</span>
-                    <div class="compact-bar-track">
-                        <div id="compact-brake" class="compact-bar brake" style="width: 0%"></div>
-                    </div>
-                </div>
             </div>
             <div class="compact-cell compact-delta">
                 <span class="compact-delta-label">Delta</span>
