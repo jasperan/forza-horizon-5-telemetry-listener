@@ -6,6 +6,7 @@ import pytest
 
 from src.telemetry_hub import TelemetryHub, UDPProtocol
 from src.data_packet import ForzaDataPacket
+from src.ws_manager import WSManager
 
 
 # ---------------------------------------------------------------------------
@@ -420,3 +421,19 @@ class TestSenderAllowlist:
         assert hub.packet_count == 1
         assert hub.session_mgr.current_session is not None
         assert hub.rejected_senders == 0
+
+
+class TestSlowSubscriberPipeline:
+    @pytest.mark.asyncio
+    async def test_ingest_reaches_db_buffer_despite_stalled_subscriber(self):
+        class StalledWS:
+            async def send_json(self, data):
+                await asyncio.Event().wait()
+
+        hub = TelemetryHub(udp_port=65530, db_pool=None, mode="race")
+        hub.ws_mgr = WSManager(send_timeout=0.05)
+        await hub.ws_mgr.connect(StalledWS(), "telemetry")
+
+        await asyncio.wait_for(hub.on_packet(_make_packet()), timeout=1.0)
+        assert hub.db_writer.pending == 1
+        assert len(hub.ws_mgr.connections["telemetry"]) == 0

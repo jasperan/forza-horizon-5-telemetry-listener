@@ -1,5 +1,6 @@
 """WebSocket connection manager for multi-channel telemetry broadcasting."""
 
+import asyncio
 import logging
 from collections import defaultdict
 from typing import Any
@@ -14,7 +15,12 @@ class WSManager:
     so broadcasts only reach subscribers of that specific channel.
     """
 
-    def __init__(self) -> None:
+    # Per-send deadline. A subscriber that stops reading must not suspend the
+    # producer (and through it the ingest/DB pipeline) indefinitely.
+    _DEFAULT_SEND_TIMEOUT = 1.0
+
+    def __init__(self, send_timeout: float = _DEFAULT_SEND_TIMEOUT) -> None:
+        self._send_timeout = send_timeout
         self.connections: dict[str, list] = defaultdict(list)
 
     async def connect(self, websocket: Any, channel: str = "telemetry") -> None:
@@ -43,9 +49,9 @@ class WSManager:
         dead: list = []
         for ws in list(self.connections[channel]):
             try:
-                await ws.send_json(data)
+                await asyncio.wait_for(ws.send_json(data), timeout=self._send_timeout)
             except Exception:
-                logger.warning("Removing dead connection from channel '%s'", channel)
+                logger.warning("Removing dead/slow connection from channel '%s'", channel)
                 dead.append(ws)
         for ws in dead:
             self.connections[channel].remove(ws)
