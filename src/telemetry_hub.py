@@ -2,6 +2,7 @@
 WebSocket broadcasting, coaching, and DB writing together."""
 
 import asyncio
+import ipaddress
 import logging
 
 from src.data_packet import ForzaDataPacket
@@ -27,6 +28,17 @@ _SESSION_FIELD_MAP = {
 }
 
 
+def _parse_trusted_networks(entries) -> list:
+    """Parse IP/CIDR strings into networks; an empty result means no allowlist."""
+    networks = []
+    for entry in entries or []:
+        entry = entry.strip()
+        if not entry:
+            continue
+        networks.append(ipaddress.ip_network(entry, strict=False))
+    return networks
+
+
 class UDPProtocol(asyncio.DatagramProtocol):
     """Thin asyncio datagram protocol that forwards raw bytes to the hub."""
 
@@ -35,6 +47,9 @@ class UDPProtocol(asyncio.DatagramProtocol):
 
     def datagram_received(self, data: bytes, addr: tuple) -> None:
         hub = self.hub
+        if not hub.is_trusted_sender(addr[0]):
+            hub.rejected_senders += 1
+            return
         if len(hub._pending_tasks) >= hub._MAX_PENDING_TASKS:
             hub.dropped_packets += 1
             return
@@ -63,12 +78,14 @@ class TelemetryHub:
         db_pool=None,
         batch_size: int = 60,
         mode: str = "race",
+        allowed_senders=None,
         coach_engine=None,
         car_dna=None,
         llm_coach=None,
     ) -> None:
         self.udp_port = udp_port
         self.mode = mode
+        self._trusted_networks = _parse_trusted_networks(allowed_senders)
 
         self.session_mgr = SessionManager()
         self.ws_mgr = WSManager()
@@ -79,9 +96,28 @@ class TelemetryHub:
         self.llm_coach = llm_coach
         self.packet_count: int = 0
         self.dropped_packets: int = 0
+        self.rejected_senders: int = 0
         self._pending_tasks: set = set()
         self._recent_alerts: list = []
         self._udp_transport: asyncio.DatagramTransport | None = None
+
+    # -- sender trust ---------------------------------------------------------
+
+    def is_trusted_sender(self, address: str) -> bool:
+        """Return True if the peer address may supply telemetry.
+
+        With no allowlist configured every sender is accepted, which matches
+        the default single-operator setup where the game and listener share a
+        trusted host or LAN. Configure ``allowed_senders`` (IPs or CIDRs) to
+        restrict datagrams to the machine running the game.
+        """
+        if not self._trusted_networks:
+            return True
+        try:
+            peer = ipaddress.ip_address(address)
+        except ValueError:
+            return False
+        return any(peer in network for network in self._trusted_networks)
 
     # -- packet parsing -------------------------------------------------------
 

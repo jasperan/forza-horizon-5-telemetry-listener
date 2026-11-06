@@ -50,6 +50,8 @@ python app.py --no-db
 
 Point your Forza Horizon telemetry output to your machine's IP on port **65530** (UDP). Data starts flowing the moment you hit the track.
 
+Forza's UDP telemetry is unauthenticated, so any host that can reach port 65530 can feed the dashboard and DB. Set `--udp-allow` to the address of the machine running the game (for example `--udp-allow 192.168.1.50` or `--udp-allow 192.168.1.0/24`) whenever the listener is reachable from an untrusted network; leave it unset only when the game and listener share the same trusted host or LAN.
+
 ## With Oracle Database
 
 For persistence, history, and vector search you'll want Oracle Autonomous JSON Database backing the platform. It's the official storage layer.
@@ -90,6 +92,7 @@ Don't have one? Sign up for Oracle Cloud and create an **Always Free** Autonomou
 |------|---------|-------------|
 | `--port` | `65530` | UDP listen port for telemetry data |
 | `--web-port` | `8080` | HTTP/WebSocket port for dashboard and API |
+| `--udp-allow` | any sender | Comma-separated IPs/CIDRs allowed to send telemetry (recommended whenever the UDP port is reachable off-host) |
 | `--mode` | `race` | `race` = only process when IsRaceOn=1; `always` = process all packets |
 | `--verbose` | off | Enable debug logging |
 | `--no-db` | off | Run without Oracle DB (dashboard, coach, and analytics still work) |

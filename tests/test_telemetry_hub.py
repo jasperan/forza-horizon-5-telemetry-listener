@@ -382,3 +382,41 @@ class TestDatagramBound:
         assert hub.packet_count == 1
         assert hub.dropped_packets == 0
         assert len(hub._pending_tasks) == 0
+
+
+class TestSenderAllowlist:
+    def test_no_allowlist_accepts_any_sender(self):
+        hub = TelemetryHub(udp_port=65530, db_pool=None)
+        assert hub.is_trusted_sender("203.0.113.9") is True
+
+    def test_allowlist_matches_exact_ip_and_cidr(self):
+        hub = TelemetryHub(udp_port=65530, db_pool=None,
+                           allowed_senders=["192.168.1.5", "10.0.0.0/24"])
+        assert hub.is_trusted_sender("192.168.1.5") is True
+        assert hub.is_trusted_sender("10.0.0.42") is True
+        assert hub.is_trusted_sender("192.168.1.6") is False
+        assert hub.is_trusted_sender("203.0.113.9") is False
+        assert hub.is_trusted_sender("not-an-ip") is False
+
+    @pytest.mark.asyncio
+    async def test_untrusted_datagram_is_rejected_before_pipeline(self):
+        hub = TelemetryHub(udp_port=65530, db_pool=None, mode="race",
+                           allowed_senders=["192.168.1.5"])
+        protocol = UDPProtocol(hub)
+        protocol.datagram_received(_make_packet(), ("203.0.113.9", 5555))
+        await asyncio.sleep(0)
+        assert hub.packet_count == 0
+        assert hub.session_mgr.current_session is None
+        assert hub.rejected_senders == 1
+
+    @pytest.mark.asyncio
+    async def test_trusted_datagram_enters_pipeline(self):
+        hub = TelemetryHub(udp_port=65530, db_pool=None, mode="race",
+                           allowed_senders=["192.168.1.5"])
+        protocol = UDPProtocol(hub)
+        protocol.datagram_received(_make_packet(), ("192.168.1.5", 5555))
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        assert hub.packet_count == 1
+        assert hub.session_mgr.current_session is not None
+        assert hub.rejected_senders == 0

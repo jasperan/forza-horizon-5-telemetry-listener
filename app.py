@@ -19,6 +19,9 @@ def parse_args():
     p.add_argument("--web-port", type=int, default=8080, help="HTTP/WS port (default: 8080)")
     p.add_argument("--web-host", default="127.0.0.1",
                    help="HTTP/WS bind host (default: 127.0.0.1; use 0.0.0.0 to expose on the LAN)")
+    p.add_argument("--udp-allow", default=None,
+                   help="Comma-separated IPs/CIDRs allowed to send telemetry "
+                        "(default: accept any sender)")
     p.add_argument("--mode", choices=["race", "always"], default="race",
                    help="'race' = log only during races, 'always' = log everything")
     p.add_argument("--verbose", action="store_true", help="Enable debug logging")
@@ -47,10 +50,16 @@ def main():
             logger.warning("Oracle DB unavailable, running in dashboard-only mode")
 
     # Core hub with all collaborators injected.
+    allowed_senders = (
+        [part.strip() for part in args.udp_allow.split(",") if part.strip()]
+        if args.udp_allow else None
+    )
+
     hub = TelemetryHub(
         udp_port=args.port,
         db_pool=db_pool,
         mode=args.mode,
+        allowed_senders=allowed_senders,
         coach_engine=CoachEngine(),
         car_dna=CarDNACollector(),
         llm_coach=LLMCoach(enabled=args.enable_llm),
