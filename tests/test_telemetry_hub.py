@@ -346,3 +346,39 @@ class TestCoachIntegration:
         coach_msgs = [b for b in broadcasts if isinstance(b, dict) and b.get("type") == "alerts"]
         assert len(coach_msgs) == 1
         assert coach_msgs[0]["alerts"][0]["rule"] == "test_rule"
+
+
+class TestDatagramBound:
+    @pytest.mark.asyncio
+    async def test_datagram_received_drops_beyond_pending_cap(self):
+        """A datagram flood cannot queue unbounded on_packet tasks."""
+        hub = TelemetryHub(udp_port=65530, db_pool=None)
+        hub._MAX_PENDING_TASKS = 1
+        gate = asyncio.Event()
+
+        async def slow_on_packet(data):
+            await gate.wait()
+
+        hub.on_packet = slow_on_packet
+        protocol = UDPProtocol(hub)
+        protocol.datagram_received(b"\x00" * 323, ("127.0.0.1", 1234))
+        protocol.datagram_received(b"\x00" * 323, ("127.0.0.1", 1234))
+
+        assert hub.dropped_packets == 1
+        await asyncio.sleep(0)
+        assert len(hub._pending_tasks) == 1
+        gate.set()
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        assert len(hub._pending_tasks) == 0
+
+    @pytest.mark.asyncio
+    async def test_datagram_received_schedules_below_cap(self):
+        hub = TelemetryHub(udp_port=65530, db_pool=None, mode="race")
+        protocol = UDPProtocol(hub)
+        protocol.datagram_received(_make_packet(), ("127.0.0.1", 1234))
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        assert hub.packet_count == 1
+        assert hub.dropped_packets == 0
+        assert len(hub._pending_tasks) == 0

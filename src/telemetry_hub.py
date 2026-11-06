@@ -34,7 +34,13 @@ class UDPProtocol(asyncio.DatagramProtocol):
         self.hub = hub
 
     def datagram_received(self, data: bytes, addr: tuple) -> None:
-        asyncio.ensure_future(self.hub.on_packet(data))
+        hub = self.hub
+        if len(hub._pending_tasks) >= hub._MAX_PENDING_TASKS:
+            hub.dropped_packets += 1
+            return
+        task = asyncio.ensure_future(hub.on_packet(data))
+        hub._pending_tasks.add(task)
+        task.add_done_callback(hub._pending_tasks.discard)
 
     def error_received(self, exc: Exception) -> None:
         logger.error("UDP protocol error: %s", exc)
@@ -46,6 +52,10 @@ class TelemetryHub:
     # Cap on buffered coaching alerts so free-roam sessions (where laps may
     # never complete to drain the list) cannot grow it without bound.
     _MAX_RECENT_ALERTS = 200
+
+    # Cap on in-flight on_packet tasks so a datagram flood cannot queue an
+    # unbounded number of coroutines; excess datagrams are dropped and counted.
+    _MAX_PENDING_TASKS = 1024
 
     def __init__(
         self,
@@ -68,6 +78,8 @@ class TelemetryHub:
         self.car_dna = car_dna
         self.llm_coach = llm_coach
         self.packet_count: int = 0
+        self.dropped_packets: int = 0
+        self._pending_tasks: set = set()
         self._recent_alerts: list = []
         self._udp_transport: asyncio.DatagramTransport | None = None
 
