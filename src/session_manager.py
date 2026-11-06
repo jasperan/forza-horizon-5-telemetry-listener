@@ -19,6 +19,11 @@ class SessionManager:
         current_lap_positions: list of (x, y, z) tuples recorded during the current lap.
     """
 
+    # Cap on positions retained for the current lap. Dash packets arrive at
+    # roughly 60 Hz, so 3600 samples cover about a minute of driving; a
+    # sustained packet rate must not grow this list without bound.
+    _MAX_LAP_POSITIONS = 3600
+
     def __init__(self) -> None:
         self._current_session: Optional[dict] = None
         self._current_lap: int = 0
@@ -113,8 +118,9 @@ class SessionManager:
                 self._lap_start_distance = distance_traveled
                 self._current_lap_positions = []
 
-            # Track position
-            self._current_lap_positions.append((position_x, position_y, position_z))
+            # Track position, bounded so packet count cannot grow memory.
+            if len(self._current_lap_positions) < self._MAX_LAP_POSITIONS:
+                self._current_lap_positions.append((position_x, position_y, position_z))
 
         self._prev_is_race_on = is_race_on
 

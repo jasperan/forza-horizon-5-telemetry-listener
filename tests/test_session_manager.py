@@ -55,3 +55,13 @@ def test_position_tracking_per_lap():
                position_x=110.0, position_y=5.0, position_z=210.0)
     assert len(mgr.current_lap_positions) == 2
     assert mgr.current_lap_positions[0] == (100.0, 5.0, 200.0)
+
+def test_lap_positions_are_bounded():
+    """A sustained packet rate cannot grow the per-lap position list past its cap."""
+    mgr = SessionManager()
+    for i in range(10000):
+        mgr.update(is_race_on=1, lap_number=1, timestamp_ms=1000 + i,
+                   car_ordinal=42, car_class=5, car_performance_index=800,
+                   drivetrain_type=2, distance_traveled=float(i),
+                   position_x=float(i), position_y=0.0, position_z=0.0)
+    assert len(mgr.current_lap_positions) == SessionManager._MAX_LAP_POSITIONS
