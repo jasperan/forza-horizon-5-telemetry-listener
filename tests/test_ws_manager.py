@@ -46,3 +46,26 @@ async def test_separate_channels():
     await mgr.broadcast("telemetry", {"speed": 50.0})
     ws_tel.send_json.assert_called_once()
     ws_coach.send_json.assert_not_called()
+
+@pytest.mark.asyncio
+async def test_slow_subscriber_does_not_block_healthy_one():
+    mgr = WSManager(send_timeout=0.05)
+
+    class StalledWS:
+        async def send_json(self, data):
+            await asyncio.Event().wait()
+
+    healthy = AsyncMock()
+    stalled = StalledWS()
+    await mgr.connect(stalled, channel="telemetry")
+    await mgr.connect(healthy, channel="telemetry")
+
+    loop = asyncio.get_running_loop()
+    started = loop.time()
+    await mgr.broadcast("telemetry", {"speed": 10.0})
+    elapsed = loop.time() - started
+
+    healthy.send_json.assert_called_once_with({"speed": 10.0})
+    assert elapsed < 0.5
+    assert stalled not in mgr.connections["telemetry"]
+    assert len(mgr.connections["telemetry"]) == 1
