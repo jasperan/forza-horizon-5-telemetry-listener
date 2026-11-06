@@ -108,3 +108,16 @@ class TestForzaDataPacket:
         assert 'ForzaDataPacket' in r
         assert '6500' in r
         assert '3000' in r
+
+    def test_short_datagram_raises_value_error(self):
+        """Truncated datagrams are rejected instead of raising struct.error."""
+        import pytest
+        for size in (0, 10, 100, 322):
+            with pytest.raises(ValueError):
+                ForzaDataPacket(b'\x00' * size)
+
+    def test_full_sized_datagrams_still_parse(self):
+        """323 bytes is the minimum accepted packet; longer packets still parse."""
+        data = _build_packet(is_race_on=1, timestamp_ms=1000)
+        assert ForzaDataPacket(data).timestamp_ms == 1000
+        assert ForzaDataPacket(data + b'\x00' * 100).timestamp_ms == 1000
