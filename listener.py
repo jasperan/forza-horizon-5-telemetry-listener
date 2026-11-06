@@ -47,7 +47,12 @@ def dump_stream(port):
     while True:
         message, address = server_socket.recvfrom(1024)
         del address
-        fdp = ForzaDataPacket(message)
+        try:
+            fdp = ForzaDataPacket(message)
+        except Exception:
+            # Malformed or truncated datagram: drop it and keep receiving.
+            logging.debug('discarding malformed datagram (%d bytes)', len(message))
+            continue
         fdp.wall_clock = dt.datetime.now()
 
         # Get all properties

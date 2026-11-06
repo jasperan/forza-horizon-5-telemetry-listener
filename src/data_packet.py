@@ -51,6 +51,12 @@ class ForzaDataPacket:
 
 
     def __init__(self, data):
+        # Reject truncated datagrams instead of letting struct.error escape:
+        # the dash format needs a full 323-byte packet.
+        if len(data) < 323:
+            raise ValueError(
+                'telemetry datagram too short: %d bytes (need 323)' % len(data)
+            )
         # Strip FH5's 12 unknown bytes at offset 232 so the dash format unpacks.
         patched_data = data[:232] + data[244:323]
         for prop_name, prop_value in zip(self.sled_props + self.dash_props,
