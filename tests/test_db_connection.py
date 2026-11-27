@@ -1,7 +1,5 @@
 """Tests for db_writer module - pool creation and config loading."""
-import importlib
 import os
-import sys
 import tempfile
 from unittest.mock import patch, MagicMock
 

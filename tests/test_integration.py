@@ -1,7 +1,6 @@
 """End-to-end tests: send fake packets through TelemetryHub, verify pipeline."""
 
 import struct
-import asyncio
 import pytest
 from fastapi.testclient import TestClient
 
