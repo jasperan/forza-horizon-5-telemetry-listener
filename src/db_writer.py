@@ -29,6 +29,11 @@ def create_pool(config_path: str = "config.yaml"):
         if wallet_dir:
             os.environ["TNS_ADMIN"] = f"{home}/{wallet_dir}"
 
+        # SODA (getSodaDatabase/insertMany) only exists in thick mode; without
+        # this every flush fails with DPY-3001 while the pool looks healthy.
+        if oracledb.is_thin_mode():
+            oracledb.init_oracle_client()
+
         db = config["db"]
         pool = oracledb.create_pool(
             user=db["username"],
