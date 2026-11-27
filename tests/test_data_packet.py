@@ -121,3 +121,19 @@ class TestForzaDataPacket:
         data = _build_packet(is_race_on=1, timestamp_ms=1000)
         assert ForzaDataPacket(data).timestamp_ms == 1000
         assert ForzaDataPacket(data + b'\x00' * 100).timestamp_ms == 1000
+
+
+def test_decode_matches_reference_unpack():
+    """decode() must match a plain struct.unpack of the gap-stripped datagram."""
+    import random
+    rng = random.Random(7)
+    raw = bytes(rng.randrange(256) for _ in range(324))
+    patched = raw[:232] + raw[244:323]
+    expected = dict(zip(ForzaDataPacket.get_props(),
+                        struct.unpack(ForzaDataPacket.dash_format, patched)))
+    decoded = ForzaDataPacket.decode(raw)
+    # repr() so NaN floats from random bytes compare equal.
+    assert {k: repr(v) for k, v in decoded.items()} == \
+        {k: repr(v) for k, v in expected.items()}
+    assert {k: repr(v) for k, v in ForzaDataPacket(raw).to_dict().items()} == \
+        {k: repr(v) for k, v in expected.items()}

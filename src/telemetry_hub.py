@@ -124,8 +124,7 @@ class TelemetryHub:
     def process_packet(self, data: bytes) -> dict | None:
         """Parse raw bytes via ForzaDataPacket, return dict or None on error."""
         try:
-            pkt = ForzaDataPacket(data)
-            return pkt.to_dict()
+            return ForzaDataPacket.decode(data)
         except Exception:
             return None
 
