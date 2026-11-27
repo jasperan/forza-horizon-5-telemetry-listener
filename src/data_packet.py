@@ -1,4 +1,4 @@
-from struct import unpack
+from struct import Struct
 
 class ForzaDataPacket:
 
@@ -51,20 +51,16 @@ class ForzaDataPacket:
 
 
     def __init__(self, data):
-        # Reject truncated datagrams instead of letting struct.error escape:
-        # the dash format needs a full 323-byte packet.
-        if len(data) < 323:
-            raise ValueError(
-                'telemetry datagram too short: %d bytes (need 323)' % len(data)
-            )
-        # Strip FH5's 12 unknown bytes at offset 232 so the dash format unpacks.
-        patched_data = data[:232] + data[244:323]
-        for prop_name, prop_value in zip(self.sled_props + self.dash_props,
-            unpack(self.dash_format,
-                patched_data)):
-            setattr(self, prop_name, prop_value)
-        
+        self.__dict__.update(zip(_ALL_PROPS, _decode(data)))
 
+    @staticmethod
+    def decode(data) -> dict:
+        """Parse a raw datagram straight into a fresh ``{prop: value}`` dict.
+
+        Same result as ``ForzaDataPacket(data).to_dict()`` without building an
+        intermediate object; this is the per-packet hot path.
+        """
+        return dict(zip(_ALL_PROPS, _decode(data)))
 
     @classmethod
     def get_props(cls):
@@ -73,7 +69,7 @@ class ForzaDataPacket:
         (the sled fields followed by the dash fields).
         '''
 
-        return(cls.sled_props + cls.dash_props)
+        return list(_ALL_PROPS)
 
 
 
@@ -88,16 +84,32 @@ class ForzaDataPacket:
             return([getattr(self, a) for a in attributes])
         
 
-        return([getattr(self, prop_name) for prop_name in \
-                self.sled_props + self.dash_props])
+        return([getattr(self, prop_name) for prop_name in _ALL_PROPS])
 
     def to_dict(self) -> dict:
         """Convert all parsed properties to a dictionary."""
-        result = {}
-        for prop in self.get_props():
-            if hasattr(self, prop):
-                result[prop] = getattr(self, prop)
-        return result
+        attrs = self.__dict__
+        return {prop: attrs[prop] for prop in _ALL_PROPS if prop in attrs}
 
     def __repr__(self) -> str:
         return f"ForzaDataPacket(race={self.is_race_on}, rpm={getattr(self, 'current_engine_rpm', 0):.0f}, ts={self.timestamp_ms})"
+
+
+_ALL_PROPS = tuple(ForzaDataPacket.sled_props + ForzaDataPacket.dash_props)
+
+# FH5 datagrams carry 12 undocumented bytes at offset 232; the sled block sits
+# before them and the dash block after. Precompiled structs read both halves
+# in place with unpack_from, so no per-packet slicing or format lookup.
+_SLED = Struct(ForzaDataPacket.sled_format)
+_DASH = Struct('<' + ForzaDataPacket.dash_format[len(ForzaDataPacket.sled_format):])
+_DASH_OFFSET = _SLED.size + 12
+_MIN_SIZE = _DASH_OFFSET + _DASH.size  # 323
+
+
+def _decode(data) -> tuple:
+    # Reject truncated datagrams instead of letting struct.error escape.
+    if len(data) < _MIN_SIZE:
+        raise ValueError(
+            'telemetry datagram too short: %d bytes (need %d)' % (len(data), _MIN_SIZE)
+        )
+    return _SLED.unpack_from(data) + _DASH.unpack_from(data, _DASH_OFFSET)
