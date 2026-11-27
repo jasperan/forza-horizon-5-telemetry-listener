@@ -67,25 +67,25 @@ class BatchedDBWriter:
     def flush(self):
         if not self._buffer:
             return
+        # Hand the full batch to the driver and start a fresh buffer.
+        docs, self._buffer = self._buffer, []
         if self.pool is None:
-            self._buffer.clear()
             return
         conn = None
         try:
             conn = self.pool.acquire()
             soda = conn.getSodaDatabase()
             coll = soda.createCollection(self.collection_name)
-            for doc in self._buffer:
-                coll.insertOne(doc)
+            # One round trip for the whole batch instead of one per document.
+            coll.insertMany(docs)
             conn.commit()
-            self.total_flushed += len(self._buffer)
-            logger.debug("Flushed %d documents to %s", len(self._buffer), self.collection_name)
+            self.total_flushed += len(docs)
+            logger.debug("Flushed %d documents to %s", len(docs), self.collection_name)
         except Exception as e:
             logger.error("DB flush failed: %s", e)
         finally:
             if conn is not None:
                 self.pool.release(conn)
-            self._buffer.clear()
 
     def save_document(self, collection_name: str, document: dict):
         if self.pool is None:
