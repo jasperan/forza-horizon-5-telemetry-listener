@@ -25,7 +25,9 @@ def test_buffer_auto_flushes_at_batch_size():
     writer.add({"speed": 60.0})
     assert writer.pending == 0
     assert writer.total_flushed == 2
-    assert mock_coll.insertOne.call_count == 2
+    mock_coll.insertMany.assert_called_once_with([{"speed": 50.0}, {"speed": 60.0}])
+    mock_coll.insertOne.assert_not_called()
+    mock_conn.commit.assert_called_once()
 
 
 def test_noop_when_no_pool():
