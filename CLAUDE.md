@@ -17,32 +17,31 @@ Real-time telemetry platform for Forza Horizon 4/5. Listens for UDP packets from
 ### Run
 ```bash
 # No database (dashboard + coach only)
-python app.py --no-db
+uv run python app.py --no-db
 
 # With Oracle DB
-python app.py --verbose
+uv run python app.py --verbose
 
 # With LLM coaching
-python app.py --no-db --enable-llm
+uv run python app.py --no-db --enable-llm
 ```
 
 ### Test
 ```bash
-pytest tests/
-pytest tests/test_coach_rules.py  # single module
+uv run pytest tests/
+uv run pytest tests/test_coach_rules.py  # single module
 ```
 
 ### Docker
 ```bash
 docker build -t forza-telemetry .
 docker run -p 65530:65530/udp -p 8080:8080 forza-telemetry --no-db
-docker compose up  # full stack with DB support
+docker compose up --build  # mounts ./config.yaml and ./wallet for DB support
 ```
 
 ## Layout
 ```
 app.py                  # entrypoint: CLI args, wires all components, starts Uvicorn
-listener.py             # UDP listener task
 src/
   data_packet.py        # 84-field struct parser (DataPacket)
   telemetry_hub.py      # central bus: fan-out to DB, coach, WS, analytics

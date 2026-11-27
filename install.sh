@@ -58,20 +58,8 @@ check_prereqs() {
     command_exists git || fail "Git is required — https://git-scm.com/"
     success "Git $(git --version | cut -d' ' -f3)"
 
-    PYTHON=""
-    for cmd in python3 python; do
-        if command_exists "$cmd"; then
-            ver=$("$cmd" -c 'import sys; v=sys.version_info; print(f"{v.major}.{v.minor}")' 2>/dev/null) || continue
-            major=${ver%%.*}
-            minor=${ver##*.}
-            if [ "$major" -gt 3 ] || { [ "$major" -eq 3 ] && [ "$minor" -ge 8 ]; }; then
-                PYTHON="$cmd"
-                break
-            fi
-        fi
-    done
-    [ -n "$PYTHON" ] || fail "Python 3.8+ is required — https://www.python.org/downloads/"
-    success "Python $($PYTHON --version | cut -d' ' -f2)"
+    command_exists uv || fail "uv is required — https://docs.astral.sh/uv/getting-started/installation/"
+    success "uv $(uv --version | cut -d' ' -f2)"
 
     if command_exists docker; then
         success "Docker $(docker --version | cut -d' ' -f3 | tr -d ',')"
@@ -82,18 +70,8 @@ check_prereqs() {
 
 install_deps() {
     cd "$INSTALL_DIR"
-    if [ ! -d ".venv" ]; then
-        info "Creating virtual environment..."
-        $PYTHON -m venv .venv
-    else
-        info "Using existing virtual environment..."
-    fi
-    # shellcheck disable=SC1091
-    source .venv/bin/activate
-
-    info "Installing dependencies..."
-    pip install --upgrade pip -q
-    pip install -r requirements.txt -q
+    info "Installing dependencies (uv sync)..."
+    uv sync -q || fail "uv sync failed"
     success "Dependencies installed"
 }
 
@@ -112,9 +90,10 @@ print_done() {
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "  ${BOLD}Location:${NC}  $INSTALL_DIR"
-    echo -e "  ${BOLD}Activate:${NC}  source $INSTALL_DIR/.venv/bin/activate"
+    echo -e "  ${BOLD}Run:${NC}       cd $INSTALL_DIR && uv run python app.py --no-db"
+    echo -e "  ${BOLD}Dashboard:${NC} http://localhost:8080"
     echo ""
-    echo -e "  ${BOLD}Note:${NC}     Oracle Database connection required — see README for setup"
+    echo -e "  ${BOLD}Note:${NC}      Oracle Database is optional — see README for setup"
     echo ""
 }
 

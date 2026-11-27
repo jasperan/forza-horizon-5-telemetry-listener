@@ -17,8 +17,6 @@ A driver-focused instrument panel with a larger racing-line view, clear gauges, 
 
 Actual browser captures with synthetic telemetry and a labeled sample coach note. No game, database, or live inference was connected. [Visual notes](docs/visuals/README.md).
 
-![telemetry](https://static.gosunoob.com/img/1/2021/11/Telemetry-Forza-Horizon-5-How-to-Turn-on-Telemetry.jpg?raw=true)
-
 ## What's New (v2.0)
 
 The old listener just piped UDP packets into a database. v2.0 bolts on a complete telemetry platform:
@@ -35,20 +33,24 @@ The old listener just piped UDP packets into a database. v2.0 bolts on a complet
 
 ## Quick Start
 
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+
 ```bash
 # Clone and install
 git clone https://github.com/jasperan/forza-horizon-5-telemetry-listener.git
 cd forza-horizon-5-telemetry-listener
-pip install -r requirements.txt
+uv sync
 
 # Run without database (dashboard only)
-python app.py --no-db
+uv run python app.py --no-db
 
 # Open dashboard
 # http://localhost:8080
 ```
 
-Point your Forza Horizon telemetry output to your machine's IP on port **65530** (UDP). Data starts flowing the moment you hit the track.
+The dashboard binds to `127.0.0.1` by default; add `--web-host 0.0.0.0` to open it from another device on your LAN.
+
+In the game, open **Settings > HUD and Gameplay** and set **Data Out** to On, **Data Out IP Address** to the IP of the machine running the listener, and **Data Out IP Port** to **65530**. Data starts flowing the moment you hit the track (with the default `--mode race`, only while a race is running).
 
 Forza's UDP telemetry is unauthenticated, so any host that can reach port 65530 can feed the dashboard and DB. Set `--udp-allow` to the address of the machine running the game (for example `--udp-allow 192.168.1.50` or `--udp-allow 192.168.1.0/24`) whenever the listener is reachable from an untrusted network; leave it unset only when the game and listener share the same trusted host or LAN.
 
@@ -60,7 +62,9 @@ Don't have one? Sign up for Oracle Cloud and create an **Always Free** Autonomou
 
 ### Setup
 
-1. Download your database wallet and drop the contents into the `./wallet` directory.
+The database layer uses SODA, which needs python-oracledb thick mode, so install [Oracle Instant Client](https://www.oracle.com/database/technologies/instant-client.html) first (the Docker image already ships it).
+
+1. Download your database wallet and unzip it, for example into `~/wallets/Wallet_forza` (or the git-ignored `./wallet` directory).
 
 2. Edit `sqlnet.ora` inside the wallet to point at the correct directory. If running via Docker:
    ```
@@ -83,7 +87,7 @@ Don't have one? Sign up for Oracle Cloud and create an **Always Free** Autonomou
 
 4. Run:
    ```bash
-   python app.py --verbose
+   uv run python app.py --verbose
    ```
 
 ## CLI Options
@@ -151,13 +155,28 @@ Connect any WebSocket client to consume data. The dashboard uses these same chan
 
 ```bash
 docker build -t forza-telemetry .
-docker run -p 65530:65530/udp -p 8080:8080 forza-telemetry --mode race
+
+# Dashboard only
+docker run -p 65530:65530/udp -p 8080:8080 forza-telemetry --no-db
 ```
 
-The container ships with Oracle Instant Client for thick-mode DB connections. Pass `--no-db` if you don't need persistence:
+The container ships with Oracle Instant Client for thick-mode DB connections. The wallet and `config.yaml` are never baked into the image (see `.dockerignore`); mount them at run time, with `WALLET_DIR: wallets/Wallet_forza` in `config.yaml` and the wallet's `sqlnet.ora` pointing at `/home/appuser/wallets/Wallet_forza`:
 
 ```bash
-docker run -p 65530:65530/udp -p 8080:8080 forza-telemetry --no-db
+docker run -p 65530:65530/udp -p 8080:8080 \
+  -v "$PWD/config.yaml:/app/config.yaml:ro" \
+  -v "$PWD/wallet:/home/appuser/wallets/Wallet_forza:ro" \
+  forza-telemetry --mode race
+```
+
+`docker compose up --build` does the same using `docker-compose.yml`. Inside a container the game's datagrams arrive from the Docker bridge address, so `--udp-allow` has to allow that address rather than the game PC.
+
+## Development
+
+```bash
+uv sync
+uv run pytest
+uv run python scripts/bench_pipeline.py   # decode / DB-batch micro-benchmark, no game or DB needed
 ```
 
 ## Data Structure

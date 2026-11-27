@@ -132,14 +132,9 @@ dmypy.json
 # ignore config.yaml file
 config.yaml
 
-# ignore wallet files
-wallet/ewallet.p12
-wallet/keystore.jks
-wallet/sqlnet.ora
-wallet/tnsnames.ora
-wallet/truststore.jks
-wallet/cwallet.sso
-wallet/ojdbc.properties
+# ignore wallet files (everything except the placeholder note)
+wallet/*
+!wallet/place_wallet_contents_here.txt
 
 # Agent/skill directories (local-only, never commit)
 .agents/

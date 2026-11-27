@@ -1,9 +1,8 @@
 FROM oraclelinux:8
 
-# Oracle Instant Client (for thick mode DB connections)
+# Oracle Instant Client (thick mode, required for SODA) and Python 3.12
 RUN dnf install -y oracle-instantclient-release-el8 && \
-    dnf install -y oracle-instantclient-basic && \
-    dnf install -y python39 python39-pip && \
+    dnf install -y oracle-instantclient-basic python3.12 python3.12-pip && \
     dnf clean all
 
 # Keeps Python from generating .pyc files in the container
@@ -16,9 +15,10 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt .
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+RUN python3.12 -m pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application code (wallet/ and config.yaml are excluded by .dockerignore;
+# mount them at run time, see README)
 COPY . .
 
 # Non-root user
@@ -29,6 +29,6 @@ USER appuser
 EXPOSE 65530/udp
 EXPOSE 8080/tcp
 
-# Entry point: new FastAPI-based app
-ENTRYPOINT ["python3", "app.py"]
+# Bind the dashboard on all interfaces inside the container so -p 8080:8080 works
+ENTRYPOINT ["python3.12", "app.py", "--web-host", "0.0.0.0"]
 CMD ["--mode", "race"]

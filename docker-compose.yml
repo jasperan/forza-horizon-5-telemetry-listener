@@ -1,8 +1,14 @@
-version: '3.4'
-
 services:
-  github:
-    image: github
+  forza-telemetry:
+    image: forza-telemetry
     build:
       context: .
-      dockerfile: ./Dockerfile
+    command: ["--mode", "race"]
+    ports:
+      - "65530:65530/udp"
+      - "8080:8080"
+    volumes:
+      # Optional: Oracle DB access. Remove both lines and use
+      # command: ["--no-db"] to run the dashboard only.
+      - ./config.yaml:/app/config.yaml:ro
+      - ./wallet:/home/appuser/wallets/Wallet_forza:ro
