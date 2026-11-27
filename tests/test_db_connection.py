@@ -34,6 +34,8 @@ def test_db_connection_loads_config():
             pool = create_pool(tmp_path)
 
             mock_oracledb.create_pool.assert_called_once()
+            # SODA needs thick mode, so the client must be initialised first.
+            mock_oracledb.init_oracle_client.assert_called_once()
             call_kwargs = mock_oracledb.create_pool.call_args
             assert call_kwargs.kwargs["user"] == "testuser"
             assert call_kwargs.kwargs["password"] == "testpass"
