@@ -23,3 +23,10 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 README.md
+**/.venv
+# Credentials: never bake them into the image, mount them at run time
+wallet/
+config.yaml
+*.pdf
+*.txt
+!requirements.txt
